@@ -1,0 +1,790 @@
+---
+title: "Untitled"
+date: "2 de novembro de 2016"
+output: html_notebook
+---
+
+**#Lista 2**
+
+
+#Exercício 5
+
+```{r setup, include=FALSE}
+censo <- read.table("http://www.ime.unicamp.br/~cnaber/censo.txt",header=T)
+
+names(censo) = c("UF","Anos de Escolaridade","Renda Média")
+
+media=data.frame(mean(censo$`Anos de Escolaridade`),mean(censo$`Renda Média`))
+names(media)=c("Anos de Escolaridade","Renda Média")
+se=data.frame(sd(censo$`Anos de Escolaridade`),sd(censo$`Renda Média`))
+names(se)=c("Anos de Escolaridade","Renda Média")
+quantis=data.frame(quantile(censo$`Anos de Escolaridade`),quantile(censo$`Renda Média`))
+names(quantis)=c("Anos de Escolaridade","Renda Média")
+```
+
+## Modelo
+
+## Estatísticas descritivas
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+ajuste <- censo$`Anos de Escolaridade` - mean(censo$`Anos de Escolaridade`)
+plot(ajuste,censo$`Renda Média`)
+
+a=sum(censo$`Renda Média`)
+b=sum((ajuste-mean(ajuste))^2)
+
+beta_0 = mean(a*((1/nrow(censo))-mean(ajuste)*((ajuste-mean(ajuste))/b)))
+
+beta_1= sum((censo$`Renda Média`)*(ajuste-mean(ajuste))/b)
+
+w_0 = (1/nrow(censo))+((mean(ajuste)^2)*b)
+w_1 = 1/b
+
+sigma2 =(sum((ajuste-beta_0-beta_1*censo$`Anos de Escolaridade`)^2))/(nrow(censo)-2)
+
+t=qt(0.975,24)
+
+ic_beta_0 = beta_0+c(-1,1)*t*sqrt(sigma2*w_0)
+ic_beta_1 = beta_1+c(-1,1)*t*sqrt(sigma2*w_1)
+
+t_0=beta_0/sqrt(sigma2*w_0) 
+t_1=beta_1/sqrt(sigma2*w_1) 
+
+t_0 > t
+t_1 > t
+
+(p_valor_beta_0_1=c(pt(t_0,24),pt(t_1,24)))
+(model <- lm((censo$`Renda Média`)~ajuste))
+pred <- predict(model)
+```
+
+```{r plot_modelo}
+plot(ajuste,censo$`Renda Média`)
+abline(model,col="red",lty = 3)
+
+par(mfrow=c(1,1))
+plot(censo$`Renda Média`,pred)
+abline(model,col="red",lty = 3)
+
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model)
+```
+
+
+```{r}
+par(mfrow=c(1,1))
+plot(censo$`Renda Média`,pred)
+abline(model,col="red",lty = 3)
+```
+
+#Exercício 6
+
+```{r leitura_dados_ex6}
+imoveis = read.table("http://www.ime.unicamp.br/~cnaber/imoveis.txt")
+names(imoveis)=c("Imposto","Área_terreno","Área_construída","Idade","Preco_venda")
+
+
+```
+
+
+```{r estat_desc_ex6}
+
+dif <- function(x){
+  diff(range(x))
+}
+
+medias = as.numeric(lapply(imoveis,mean))
+se = as.numeric(lapply(imoveis,sd))
+quantis = lapply(imoveis,quantile)
+ampli = lapply(imoveis,dif)
+
+(estats_desc=data.frame(medias,se,quantis,ampli))
+x = matrix(data=c(rep(1,27),imoveis$Imposto,imoveis$Área_terreno,imoveis$Área_construída,imoveis$Idade),nrow=27,ncol=5)
+imoveis$Área_terreno
+```
+
+## Na mão
+
+```{r}
+library(MASS)
+x = matrix(data=c(rep(1,27),imoveis$Imposto,imoveis$Área_terreno,imoveis$Área_construída,imoveis$Idade),nrow=27,ncol=5)
+
+psi = ginv(t(x)%*%x)
+
+beta=ginv(t(x)%*%x)%*%t(x)%*%imoveis$Preco_venda
+identidade=diag((nrow(imoveis)))
+sigma2 = (1/(nrow(imoveis)-4))*(t(imoveis$Preco_venda)%*%(identidade-x%*%ginv(t(x)%*%x)%*%t(x))%*%imoveis$Preco_venda)
+
+t = qt(0.975,(nrow(imoveis)-4))
+
+ic = function(beta,x){
+  psi = ginv(t(x)%*%x)
+  ics= numeric(2*nrow(psi))
+  j=1
+  for(i in seq(1,10,2)){
+  ics[i]=beta[j]-1*t*sqrt(sigma2*psi[j,j])
+  ics[i+1]=beta[j]+1*t*sqrt(sigma2*psi[j,j])
+  j=j+1
+  }
+  return(ics)
+}
+
+teste = function(beta){
+        ts= numeric(nrow(psi))
+        
+        for(i in 1:nrow(psi)){
+        
+          
+           ts[i]=beta/sqrt(as.numeric(sigma2*(psi[i,i])))
+        
+         }
+        return(ts)
+}
+
+tes = teste(beta)
+
+tes < t
+
+```
+
+
+## Código em R
+
+```{r}
+(modelo <- lm(Preco_venda~Imposto+Área_terreno+Área_construída+Idade,data=imoveis))
+pred = predict(modelo)
+plot(imoveis$Preco_venda,pred)
+abline(modelo,col="red")
+```
+
+**#Lista 3**
+
+
+```{r gráficos de resíduos, cache=TRUE, echo=FALSE}
+envelnorm<-function(fit.model){
+# fit.model: objeto com o ajuste do modelo normal linear homocedástico 
+# obtido através da função "lm"
+
+#par(mfrow=c(1,1))
+X <- model.matrix(fit.model)
+n <- nrow(X)
+p <- ncol(X)
+H <- X%*%solve(t(X)%*%X)%*%t(X)
+h <- diag(H)
+si <- lm.influence(fit.model)$sigma
+r <- resid(fit.model)
+tsi <- r/(si*sqrt(1-h))
+#
+ident <- diag(n)
+epsilon <- matrix(0,n,100)
+e <- matrix(0,n,100)
+e1 <- numeric(n)
+e2 <- numeric(n)
+#
+for(i in 1:100){
+     epsilon[,i] <- rnorm(n,0,1)
+     e[,i] <- (ident - H)%*%epsilon[,i]
+     u <- diag(ident - H)
+     e[,i] <- e[,i]/sqrt(u)
+     e[,i] <- sort(e[,i]) }
+#
+for(i in 1:n){
+     eo <- sort(e[i,])
+     e1[i] <- (eo[2]+eo[3])/2
+     e2[i] <- (eo[97]+eo[98])/2 }
+#
+med <- apply(e,1,mean)
+faixa <- range(tsi,e1,e2)
+#
+#par(pty="s")
+qqnorm(tsi,xlab="Percentil da N(0,1)",
+ylab="Residuo Studentizado", ylim=faixa, pch=16, main="",cex=1.1,cex.axis=1.1,cex.lab=1.1)
+par(new=T)
+qqnorm(e1,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=1, main="")
+par(new=T)
+qqnorm(e2,axes=F,xlab="",ylab="", type="l",ylim=faixa,lty=1, main="")
+par(new=T)
+qqnorm(med,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=2, main="")
+#------------------------------------------------------------#
+}
+
+diagnorm<-function(fit.model){
+# fit.model: objeto com o ajuste do modelo normal linear homocedástico 
+# obtido através da função "lm"
+
+par(mfrow=c(2,2))
+X <- model.matrix(fit.model)
+n <- nrow(X)
+p <- ncol(X)
+H <- X%*%solve(t(X)%*%X)%*%t(X)
+h <- diag(H)
+lms <- summary(fit.model)
+s <- lms$sigma
+r <- resid(lms)
+ts <- r/(s*sqrt(1-h))
+di <- (1/p)*(h/(1-h))*(ts^2)
+si <- lm.influence(fit.model)$sigma
+tsi <- r/(si*sqrt(1-h))
+a <- max(tsi)
+b <- min(tsi)
+par(mfrow=c(2,2))
+#
+plot(tsi,xlab="Índice", ylab="Resíduo Studentizado",
+ylim=c(b-1,a+1), pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
+abline(2,0,lty=2)
+abline(-2,0,lty=2)
+abline(0,0,lty=2)
+#identify(tsi, n=1)
+#title(sub="(c)")
+#
+plot(fitted(fit.model),tsi,xlab="Valores Ajustados", 
+ylab="Resíduo Studentizado", ylim=c(b-1,a+1), pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
+#
+abline(2,0,lty=2)
+abline(-2,0,lty=2)
+abline(0,0,lty=2)
+#boxplot(tsi,ylab="Resíduo Studentizado",cex=1.1,cex.axis=1.1,cex.lab=1.1)
+hist(tsi,xlab="Resíduo Studentizado",ylab="densidade",probability=TRUE,main="",cex=1.1,cex.axis=1.1,cex.lab=1.1)
+#title(sub="(d)")
+#identify(fitted(fit.model),tsi, n=1)
+#
+ident <- diag(n)
+epsilon <- matrix(0,n,100)
+e <- matrix(0,n,100)
+e1 <- numeric(n)
+e2 <- numeric(n)
+#
+for(i in 1:100){
+     epsilon[,i] <- rnorm(n,0,1)
+     e[,i] <- (ident - H)%*%epsilon[,i]
+     u <- diag(ident - H)
+     e[,i] <- e[,i]/sqrt(u)
+     e[,i] <- sort(e[,i]) }
+#
+for(i in 1:n){
+     eo <- sort(e[i,])
+     e1[i] <- (eo[2]+eo[3])/2
+     e2[i] <- (eo[97]+eo[98])/2 }
+#
+med <- apply(e,1,mean)
+faixa <- range(tsi,e1,e2)
+#
+#par(pty="s")
+qqnorm(tsi,xlab="Percentil da N(0,1)",
+ylab="Resíduo Studentizado", ylim=faixa, pch=16, main="",cex=1.1,cex.axis=1.1,cex.lab=1.1)
+par(new=T)
+qqnorm(e1,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=1, main="")
+par(new=T)
+qqnorm(e2,axes=F,xlab="",ylab="", type="l",ylim=faixa,lty=1, main="")
+par(new=T)
+qqnorm(med,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=2, main="")
+#---------------------------------------------------------------#
+}
+
+
+
+```
+
+```{r Teste Cbeta, cache=TRUE, echo=FALSE}
+# fit.model: saída do modelo ajustado
+# m.C: matriz C relativa às hipóteses de interesse
+
+testeF.CB <- function(fit.model,m.C)
+{
+v.beta <-  cbind(fit.model$coef) # vetor com a estimativa dos parâmetros
+n <- nrow(model.matrix(fit.model)) # número de observações
+e.p <- nrow(v.beta) # número de parâmetros
+e.q <- nrow(m.C)  # número de linhas da matriz C
+m.cov.beta <- (vcov(fit.model)) # matriz de covariâncias dos parâmetros do modelo
+# Estatística do Teste
+e.F <- t(m.C%*%v.beta)%*%solve(m.C%*%m.cov.beta%*%t(m.C))%*%(m.C%*%v.beta)/e.q
+e.pvalor <- 1-pf(e.F,e.q,n-e.p) # p-0valor
+cat("Estatistica F = ",round(e.F,2),"\n")
+cat("pvalor = ",round(e.pvalor,4),"\n")
+cat("Matriz C :","\n")
+print(m.C)
+}
+
+# fit.model: saída do modelo ajustado
+# m.C: matriz C relativa às hipóteses de interesse
+#m.M : matriz M relativa às hipóteses de interesse
+testeF.CBM <- function(fit.model,m.C,m.M)
+
+{
+v.beta <-  cbind(fit.model$coef) # vetor com a estimativa dos parâmetros
+n <- nrow(model.matrix(fit.model)) # número de observações
+e.p <- nrow(v.beta) # número de parâmetros
+e.q <- nrow(m.C)  # número de linhas da matriz C
+m.cov.beta <- (vcov(fit.model)) # matriz de covariâncias dos parâmetros do modelo
+# Estatística do teste
+e.F <- t(m.C%*%v.beta-m.M)%*%solve(m.C%*%m.cov.beta%*%t(m.C))%*%(m.C%*%v.beta-m.M)/e.q
+e.pvalor <- 1-pf(e.F,e.q,n-e.p) # p-valor
+cat("Estatistica F = ",round(e.F,2),"\n")
+cat("pvalor = ",round(e.pvalor,4),"\n")
+cat("Matriz C :","\n")
+print(m.C)
+cat("Matriz M :","\n")
+print(m.M)
+
+}
+
+```
+
+
+# Exercício 3
+
+```{r}
+#leitura dos dados
+censo = read.table("http://www.ime.unicamp.br/~cnaber/censo.txt")
+names(censo)=c("Estado","Anos_escolaridade","Renda_media")
+
+```
+
+### Análise descritiva
+
+#### Gráfico
+
+```{r}
+plot(censo$Anos_escolaridade,censo$Renda_media,xlab="Anos de escolaridade",ylab="Renda média")
+```
+
+
+### Modelos
+
+Dada a natureza dos dados, como vista no gráfico acima, proporá-se dois modelos, um linear e outro quadrado
+
+
+#### Modelo 1 (Linear)
+
+$$y_{i}=\beta_{0}+\beta_{1}x_{i}+e_{i}$$
+
+##### Ajuste
+```{r}
+modelo1 = lm(censo$Renda_media~censo$Anos_escolaridade)
+summary(modelo1)
+```
+
+##### Análise Residual 
+```{r}
+
+diagnorm(modelo1)
+
+```
+
+1. Presença de Heterocedasticidade (Vista no gráfico Valores Ajustados x Resíduos Studentalizados)
+
+2. Possível não normalidade dos dados (Vista no gráfico Resíduo Studentalizado x densidade)
+
+#### Modelo 2 (Quadrado)
+
+$$y_{i}=\beta_{0}+\beta_{1}x_{i}+\beta_{2}x_{i}^{2}+e_{i}$$
+
+**Ajuste** 
+```{r}
+a2 = (censo$Anos_escolaridade)^2
+modelo2=lm(censo$Renda_media~censo$Anos_escolaridade+a2)
+summary(modelo2)
+```
+
+**Análise Residual**:
+```{r}
+diagnorm(modelo2)
+```
+
+1. Presença de Heterocedasticidade (Vista no gráfico Valores Ajustados x Resíduos Studentalizados)
+
+2. Possível não normalidade dos dados (Vista no gráfico Resíduo Studentalizado x densidade)
+
+
+**AIC,BIC e Teste da Razão de Verossimilhança**:
+
+```{r}
+library(printr)
+estat_test =  data.frame(rbind(AIC(modelo1),BIC(modelo1),logLik(modelo1)),rbind(AIC(modelo2),BIC(modelo2),logLik(modelo2)))
+rownames(estat_test)=c("AIC","BIC","Log-Verosi")
+colnames(estat_test)=c("Modelo1","Modelo2")
+estat_test
+```
+
+Pelas análises de **AIC** e do **BIC**, observa-se que o segundo modelo proposto é o melhor a se utilizado pois os valores das estastísticas são menores(Quanto menor, melhor).
+
+# Exercício 4
+
+# Exercício 5
+
+```{r, cache=TRUE, echo=FALSE}
+
+#leitura dos dados
+
+dados_escova = read.table("http://www.ime.unicamp.br/~cnaber/Singer&Andrade1997.txt")
+names(dados_escova)=c("indivíduo","sexo" ,"IPB_pré-escovação_escova_Hugger","IPB_pós-escovação_escova_Hugger","IPB_pré-escovação_escova_tradicional","IPB_pós-escovação_tradicional")
+hae <- dados_escova[,3] # IPB pré-escovação: escova Hugger 
+hde <- dados_escova[,4] # IPB pós-escovação: escova Hugger
+cae <- dados_escova[,5] # IPB pré-escovação: escova tradicional
+cde <- dados_escova[,6] # IPB pós-escovação: escova tradicional
+
+ipbpre <- c(cae,hae) # IPB pré-escovação 
+ipbpos <- c(cde,hde) # IPB pós-escovação
+tesc <- c(rep("Convencional",26),rep("Hugger",26))# tipo de escova
+tescf <- factor(tesc,levels=c("Convencional","Hugger"))
+sex <- c(rep("F",14),rep("M",12),rep("F",14),rep("M",12))
+sexo = factor(sex,levels=c("F","M"))
+
+sexotescf = interaction(sexo,tescf)
+```
+
+## Análise Descritiva
+
+### Gráficos
+
+```{r}
+
+boxplot(dados_escova$`IPB_pré-escovação_escova_Hugger`,dados_escova$sexo)
+
+boxplot(dados_escova$`IPB_pré-escovação_escova_tradicional`,dados_escova$sexo)
+```
+
+
+```{r, echo=FALSE}
+par(mfrow=c(1,2))
+plot(dados_escova$`IPB_pré-escovação_escova_Hugger`,dados_escova$`IPB_pós-escovação_escova_Hugger`,ylim=c(0,3),xlab="Pré Escovação escova Hugger",ylab="Pós Escovação escova Hugger")
+
+plot(dados_escova$`IPB_pré-escovação_escova_tradicional`,dados_escova$`IPB_pós-escovação_tradicional`,ylim=c(0,3), xlab="Pré Escovação escova Tradicional",ylab="Pós Escovação escova Tradicional")
+
+```
+
+
+
+
+## Ajuste do Modelo em R
+
+
+### Ajuste do modelo completo
+
+#### Modelo
+
+$$y_{ijk}=\beta_{0ij}+\beta_{1ij}x_{ijk}+\varepsilon_{ijk}$$
+
+$\beta_{0ij}$:Valor Esperado quando a quantidade de placa for igual a zero($x_{ijk}$=0)
+
+$\beta_{1ij}$:Incremento(+/-) quanto se aumenta uma unidade da variável explicativa
+
+$x_{ijk}$: individuo k que escovou com a escova j e é do sexo i
+
+$\varepsilon_{ijk}$:erro amostral
+
+$\varepsilon_{ijk}\sim \mathit{N}(0,\sigma ^{2})$
+
+```{r}
+
+result_compl <- lm(ipbpos~-1+sexotescf+(ipbpre:sexotescf))
+summary(result_compl)
+
+```
+
+Pode-se observar que os interceptos das retas não são significativos, ou seja, a redução de placa é esta´tisticamente igual para índice da placa igual a 0. 
+
+Para os coeficientes angulares nota-se que para os casos aonde se escova com a escova convencional, independentemente do sexo e quando as meninas escovam com a escova Hugger que o valor do intercepto é "alto", ou seja, não houve uma redução drástica de placas quanto houve no caso em que os meninos escovaram com a Hugger.
+
+**Matriz de planejamento**
+
+```{r, echo=FALSE}
+library(printr)
+planmatrix = data.frame(model.matrix(result_compl))
+names(planmatrix)=c("ConvencionalF","ConvencionalM","HuggerF","HuggerM","ipbpreConvF","ipbpreConvm","ipbpreHuggerF","ipbprehuggerM")
+planmatrix
+```
+
+#### Diagnóstico
+
+
+##### Gráfico  
+
+
+```{r}
+diagnorm(result_compl)
+```
+
+Pela análise residual nota-se que há indicios de heterocedasticidade nos dados. QUanto as suposições de normalidade e independência parecem mais compatíveis com os gráficos apresentados.
+
+#### Teste
+
+Consideremos a seguinte hipótese:
+
+$$\beta_{01k}=\beta_{02k}=\beta_{03k}=\beta_{04k}=0$$
+
+Utilizaremos o teste $C\beta=0$ com:
+
+$$ C=\begin{bmatrix}
+1 & -1 & 0 & 0 & 0 & 0  & 0 & 0\\ 
+1 & 0 & -1 & 0 & 0 & 0 & 0 & 0\\ 
+1 & 0 & 0 & -1  & 0 & 0 & 0 & 0 
+\end{bmatrix}$$
+
+```{r}
+c=t(matrix(c(1,-1,0,0,0,0,0,0,1,0,-1,0,0,0,0,0,1,0,0,-1,0,0,0,0),8,3))
+testeF.CB(result_compl,c)
+```
+ 
+O teste acima não evidencia que os interceptos possam ser diferentes de zero, ou seja, não se rejeitará a hipótese nula. 
+
+### Ajustando um modelo sem intercepto
+
+Dada a natureza do problema, pode-se imaginar um modelo sem intercepto pois quando o indice pré-escovação é zero espera que pós-escovação também o seja.
+
+Logo, seja o modelo(ainda considerando o sexo):
+
+$$y_{ijk}=\beta_{1ij}x_{ijk}+\varepsilon_{ijk}$$
+
+$\beta_{1ij}$:Incremento(+/-) quanto se aumenta uma unidade da variável explicativa
+
+$x_{ijk}$: individuo k que escovou com a escova j e é do sexo i
+
+$\varepsilon_{ijk}$:erro amostral
+
+$\varepsilon_{ijk}\sim \mathit{N}(0,\sigma ^{2})$
+
+```{r}
+result_s_i <- lm(ipbpos~-1+(ipbpre:sexotescf))
+summary(result_s_i)
+```
+
+
+Observa-se que o desempenho das escovas Hugger são melhores comparados aos da convencional, inpedentemente do sexo.
+
+Obviamente, nota-se uma diminuição do indice de placas mas é natural dada a natureza do experimento pois quando se escova o dente razoavelmente bem, é natural que haja diminuição das placas.
+
+**Matriz de planejamento**
+```{r, echo=FALSE}
+library(printr)
+planmatrix1 = data.frame(model.matrix(result_s_i))
+names(planmatrix)=c("ConvencionalF","ConvencionalM","HuggerF","HuggerM","ipbpreConvF","ipbpreConvm","ipbpreHuggerF","ipbprehuggerM")
+planmatrix1
+```
+
+#### Diagnóstico
+```{r}
+diagnorm(result_s_i)
+```
+
+Vemos que hápresença de heterocedasticidade.
+
+
+#### Testes
+
+Realizaremos o teste $C\beta=0$ para testarmos: $\beta_{1ij}=\beta_{2ij}=\beta_{3ij}=\beta_{4ij}$ com $$ 
+
+C=\begin{bmatrix}
+1 & -1  & 0 & 0\\ 
+1 & 0 & -1 & 0\\ 
+1 & 0 & 0 & -1 
+\end{bmatrix}$$
+
+```{r}
+(c=t(matrix(c(1,-1,0,0,1,0,-1,0,1,0,0,-1),4,3)))
+testeF.CB(result_s_i,c)
+```
+
+#### Ajustando um modelo reduzido, desconsiderando o sexo
+
+Dada a análise anterior, façamos um modelo que desconsiderará o sexo como fator de análise.
+
+**Modelo** :
+
+$$y_{ij}=\beta_{0i}+\beta_{1i}x_{ij}+\varepsilon_{ij}$$
+
+$\beta_{0i}$:Valor Esperado quando a quantidade de placa for igual a zero($x_{ij}$=0).
+
+$\beta_{1i}$:Incremento(+/-) quanto se aumenta uma unidade da variável explicativa.
+
+$x_{ij}$: individuo j que escovou com a escova i.
+
+$\varepsilon_{ij}$:erro amostral.
+
+$\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
+
+
+```{r}
+result <- lm(ipbpos~-1+tescf+ipbpre:tescf)
+summary(result)
+```
+
+Observa-se que os interceptos parecem ser nulos e os coeficientes angulares sugerem uma superioridade da escova Hugger(quanto menor, melhor). 
+
+##### Gráfico
+
+```{r}
+diagnorm(result)
+```
+
+
+Dados os gráficos apresentados acima, observa-se que as suposições homocedasticidade e normalidade não são atendidas pois observa-se no uma tendência em forma de funil no gráfico de Valores Ajustados x Resíduos Studentizados, indicando oscilação de variãncia. No gráfico de Resíduos Studentizados x densidade, observa-se uma leve assimetria dos dados.
+
+Pode-se resolver o problema, modelando os erros por alguma distribuição assimétrica, ou talvez, mesmo por uma Distribuição Normal Heterocedástica.
+
+##### Teste
+
+Consideremos a seguinte hipótese:
+
+$$\beta_{00}=\beta_{01}=0$$
+
+Utilizaremos o teste $C\beta=0$ com 
+
+$$ C=\begin{bmatrix}
+1 & -1 & 0 & 0 & \\ 
+\end{bmatrix}$$
+
+
+```{r}
+(c=t(matrix(c(1,-1,0,0),4,1)))
+testeF.CB(result,c)
+```
+
+O teste feito mostra a evidência de que os interceptos são iguais a zero, o que pode levar a construírmos um modelo sem intercepto.
+
+##### Modelos sem intercepto
+
+```{r}
+result_0 <- lm(ipbpos~-1+ipbpre:tescf)
+summary(result_0)
+
+```
+
+
+```{r}
+diagnorm(result_0)
+```
+
+Presença de Heterocedasticidade
+
+##### Testes
+
+Far-se-á um teste $C\beta=0$ com a seguinte hipótese $$\beta_{11}=\beta_{12}=0$$ com:
+
+$$ C=\begin{bmatrix}
+1 & -1 & 0 & 0 & \\ 
+\end{bmatrix}$$
+
+```{r}
+(c=t(matrix(c(1,-1),2,1)))
+testeF.CB(result_0,c)
+```
+
+O teste acima evidencia que os interceptos são distintos. Pode-se observar que a estimativa de $\beta_{10}=$ `r (summary(result_0)$coefficients)[1]` é maior que a de $\beta_{11}=$ `r (summary(result_0)$coefficients)[2]`, mostrando que a escova Hugger é superior a Convencional(Quanto menor, melhor).
+
+Para estimarmos o ganho do melhor tipo de escova, usaremos o método Delta.
+
+```{r}
+ganho=round(((summary(result_0)$coefficients)[2]/(summary(result_0)$coefficients)[1])*100,1)
+```
+
+Ganho obtido: ``r ganho`%.
+
+# Exercício 6
+
+```{r,echo=FALSE}
+#leitura dos dados
+mydata3 = read.table(choose.files())
+names(mydata3)=c("Indivíduo","Grupo","Dia","Antes","Depois")
+mydata3$Antes = as.integer(mydata3$Antes)
+mydata3$Depois = as.integer(mydata3$Depois)
+```
+
+### Análise Descritiva
+
+```{r, echo=FALSE}
+library(printr)
+medias.grupo = aggregate(mydata3$Antes, by=list(mydata3$Grupo),mean)
+medias.dia = aggregate(mydata3$Antes, by=list(mydata3$Dia),mean)
+medias = data.frame(medias.grupo,medias.dia)
+names(medias)=c("Grupo","Media","Dia","Media")
+medias
+```
+
+
+```{r}
+par(mfrow=c(1,2))
+
+boxplot(Antes~factor(Grupo),data=mydata3)
+
+boxplot(Antes~factor(Dia),data=mydata3)
+
+boxplot(Depois~factor(Grupo),data=mydata3)
+```
+
+O Boxplot mostra que "antes" não haviam diferenças significativas entre os grupos e também relacionadamente aos dias.
+
+### Ajuste do modelo com intercepto, desconsiderando o dia.
+
+#### Modelo
+$$y_{ij}=\beta_{0i}+\beta_{1i}x_{ij}+e_{ij}$$
+
+$\beta_{0i}$ = valor esperado quando o valor do IPB antes é igual a zero.
+
+$\beta_{1i}$ = incremento (+/-) quando se aumenta o valor de $x_{ij}$ em uma unidade.
+
+```{r}
+results = lm((Depois) ~ -1+Grupo + Antes:Grupo, mydata3)
+summary(results)
+
+```
+
+Observamos que os interceptos não influenciam na regressão, o qeu pode levarmos a considerar um modelo sem intercepto. 
+
+Conclui-se também que os grupos 2 e 3 tiveram maior redução em suas taxas que os outros grupos.
+
+
+```{r}
+diagnorm(results)
+
+```
+
+Os gráficos indicam a presença de heterocedasticidade. Uma leve assimetria negativa é notada pois o gráfico de resíduso studentizados x densidade apontam para uma leve concentração de dados "à direita" do centro. 
+
+#### Testes
+
+Consideremos a seguinte hipótese:
+
+$$\beta_{i0}=\beta_{i1}=\beta_{i3}=\beta_{i4}=0$$
+
+Utilizaremos o teste $C\beta=0$ com $$ C=\begin{bmatrix}
+1 & -1 & 0 & 0 & 0 & 0  & 0 & 0\\ 
+1 & 0 & -1 & 0 & 0 & 0 & 0 & 0\\ 
+1 & 0 & 0 & -1  & 0 & 0 & 0 & 0 
+\end{bmatrix}$$
+
+
+```{r}
+(c=t(matrix(c(1,-1,0,0,0,0,0,0,1,0,-1,0,0,0,0,0,1,0,0,-1,0,0,0,0),8,3)))
+testeF.CB(results,c)
+```
+
+### Ajustando Modelo sem intercepto
+
+```{r}
+results1 = lm((Depois) ~ -1+Antes, mydata3)
+summary(results1)
+diagnorm(results1)
+```
