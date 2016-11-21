@@ -1,186 +1,14 @@
 ---
 title: "Untitled"
+author: "Eliane,Henrique,Guilherme Pazian,Murilo"
 date: "2 de novembro de 2016"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
 
-**#Lista 2**
-
-
-#Exercício 5
-
-```{r setup, include=FALSE}
-censo <- read.table("http://www.ime.unicamp.br/~cnaber/censo.txt",header=T)
-
-names(censo) = c("UF","Anos de Escolaridade","Renda Média")
-
-media=data.frame(mean(censo$`Anos de Escolaridade`),mean(censo$`Renda Média`))
-names(media)=c("Anos de Escolaridade","Renda Média")
-se=data.frame(sd(censo$`Anos de Escolaridade`),sd(censo$`Renda Média`))
-names(se)=c("Anos de Escolaridade","Renda Média")
-quantis=data.frame(quantile(censo$`Anos de Escolaridade`),quantile(censo$`Renda Média`))
-names(quantis)=c("Anos de Escolaridade","Renda Média")
-```
-
-## Modelo
-
-## Estatísticas descritivas
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-
-```{r}
-ajuste <- censo$`Anos de Escolaridade` - mean(censo$`Anos de Escolaridade`)
-plot(ajuste,censo$`Renda Média`)
-
-a=sum(censo$`Renda Média`)
-b=sum((ajuste-mean(ajuste))^2)
-
-beta_0 = mean(a*((1/nrow(censo))-mean(ajuste)*((ajuste-mean(ajuste))/b)))
-
-beta_1= sum((censo$`Renda Média`)*(ajuste-mean(ajuste))/b)
-
-w_0 = (1/nrow(censo))+((mean(ajuste)^2)*b)
-w_1 = 1/b
-
-sigma2 =(sum((ajuste-beta_0-beta_1*censo$`Anos de Escolaridade`)^2))/(nrow(censo)-2)
-
-t=qt(0.975,24)
-
-ic_beta_0 = beta_0+c(-1,1)*t*sqrt(sigma2*w_0)
-ic_beta_1 = beta_1+c(-1,1)*t*sqrt(sigma2*w_1)
-
-t_0=beta_0/sqrt(sigma2*w_0) 
-t_1=beta_1/sqrt(sigma2*w_1) 
-
-t_0 > t
-t_1 > t
-
-(p_valor_beta_0_1=c(pt(t_0,24),pt(t_1,24)))
-(model <- lm((censo$`Renda Média`)~ajuste))
-pred <- predict(model)
-```
-
-```{r plot_modelo}
-plot(ajuste,censo$`Renda Média`)
-abline(model,col="red",lty = 3)
-
-par(mfrow=c(1,1))
-plot(censo$`Renda Média`,pred)
-abline(model,col="red",lty = 3)
-
-```
-
-```{r}
-par(mfrow=c(2,2))
-plot(model)
-```
-
-
-```{r}
-par(mfrow=c(1,1))
-plot(censo$`Renda Média`,pred)
-abline(model,col="red",lty = 3)
-```
-
-#Exercício 6
-
-```{r leitura_dados_ex6}
-imoveis = read.table("http://www.ime.unicamp.br/~cnaber/imoveis.txt")
-names(imoveis)=c("Imposto","Área_terreno","Área_construída","Idade","Preco_venda")
-
-
-```
-
-
-```{r estat_desc_ex6}
-
-dif <- function(x){
-  diff(range(x))
-}
-
-medias = as.numeric(lapply(imoveis,mean))
-se = as.numeric(lapply(imoveis,sd))
-quantis = lapply(imoveis,quantile)
-ampli = lapply(imoveis,dif)
-
-(estats_desc=data.frame(medias,se,quantis,ampli))
-x = matrix(data=c(rep(1,27),imoveis$Imposto,imoveis$Área_terreno,imoveis$Área_construída,imoveis$Idade),nrow=27,ncol=5)
-imoveis$Área_terreno
-```
-
-## Na mão
-
-```{r}
-library(MASS)
-x = matrix(data=c(rep(1,27),imoveis$Imposto,imoveis$Área_terreno,imoveis$Área_construída,imoveis$Idade),nrow=27,ncol=5)
-
-psi = ginv(t(x)%*%x)
-
-beta=ginv(t(x)%*%x)%*%t(x)%*%imoveis$Preco_venda
-identidade=diag((nrow(imoveis)))
-sigma2 = (1/(nrow(imoveis)-4))*(t(imoveis$Preco_venda)%*%(identidade-x%*%ginv(t(x)%*%x)%*%t(x))%*%imoveis$Preco_venda)
-
-t = qt(0.975,(nrow(imoveis)-4))
-
-ic = function(beta,x){
-  psi = ginv(t(x)%*%x)
-  ics= numeric(2*nrow(psi))
-  j=1
-  for(i in seq(1,10,2)){
-  ics[i]=beta[j]-1*t*sqrt(sigma2*psi[j,j])
-  ics[i+1]=beta[j]+1*t*sqrt(sigma2*psi[j,j])
-  j=j+1
-  }
-  return(ics)
-}
-
-teste = function(beta){
-        ts= numeric(nrow(psi))
-        
-        for(i in 1:nrow(psi)){
-        
-          
-           ts[i]=beta/sqrt(as.numeric(sigma2*(psi[i,i])))
-        
-         }
-        return(ts)
-}
-
-tes = teste(beta)
-
-tes < t
-
-```
-
-
-## Código em R
-
-```{r}
-(modelo <- lm(Preco_venda~Imposto+Área_terreno+Área_construída+Idade,data=imoveis))
-pred = predict(modelo)
-plot(imoveis$Preco_venda,pred)
-abline(modelo,col="red")
-```
 
 **#Lista 3**
-
 
 ```{r gráficos de resíduos, cache=TRUE, echo=FALSE}
 envelnorm<-function(fit.model){
@@ -355,11 +183,12 @@ print(m.M)
 
 # Exercício 3
 
+
 ```{r}
 #leitura dos dados
 censo = read.table("http://www.ime.unicamp.br/~cnaber/censo.txt")
 names(censo)=c("Estado","Anos_escolaridade","Renda_media")
-
+censo
 ```
 
 ### Análise descritiva
@@ -432,6 +261,127 @@ Pelas análises de **AIC** e do **BIC**, observa-se que o segundo modelo propost
 
 # Exercício 4
 
+```{r "leitura dos dados"}
+dados_imoveis = read.table("http://www.ime.unicamp.br/~cnaber/imoveis.txt",)
+names(dados_imoveis) <- c("imposto do imóvel","área do terreno","área construída","idade da residência","preço de venda do imóvel")
+dados_imoveis
+```
+
+```{r Análise Descritiva}
+par(mfrow=c(2,2))
+plot(dados_imoveis$`preço de venda do imóvel`,dados_imoveis$`imposto do imóvel`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "imposto do imóvel (em 100 USD)")
+plot(dados_imoveis$`preço de venda do imóvel`,dados_imoveis$`área do terreno`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "área do terreno (em 1000 pés quadrados)")
+plot(dados_imoveis$`preço de venda do imóvel`,dados_imoveis$`área construída`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "área construída (em 1000 pés quadrados)")
+plot(dados_imoveis$`preço de venda do imóvel`,dados_imoveis$`idade da residência`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "idade da residência (em anos)")
+```
+
+Note que parece razoável modelar os dados via modelo de regressão linear múltipla. Conforme sugerido (no ex 6 da lista 2), vamos modela-los, inicialmente, por 4 retas. Dado a natureza dos dados (unidades diferentes) vamos utilizar o seguinte modelo:
+
+
+$$y_{ij}=\beta_{0}+\beta_{1i}\left(\frac{x_{ij}-\bar{x}_i}{s_i}\right) +e_{ij}$$
+
+$\beta_{0}$ = valor esperado no valor da venda para $y_{ij}$ quando os $x_{ij}$ têm valores iguais as respectivas médias $\bar{x_i}$ .  **#Dúvida (conferir a interpretação)**
+
+$\frac{\beta_{1i}}{s_i}$ = incremento (+/-) quando se aumenta o valor de $x_{ij}$ em uma unidade (mantendo-se as demais variáveis fixas).
+
+```{r}
+medias = lapply(dados_imoveis,mean)
+se = lapply(dados_imoveis,sd)
+processed.dados_imoveis <- dados_imoveis
+
+#colocando os dados na mesma escala:
+
+processed.dados_imoveis$`imposto do imóvel` <- (dados_imoveis$`imposto do imóvel`-medias$`imposto do imóvel`)/se$`imposto do imóvel`
+
+processed.dados_imoveis$`área do terreno`<-(dados_imoveis$`área do terreno`- medias$`área do terreno`)/se$`área do terreno`    
+
+processed.dados_imoveis$`área construída` <- (dados_imoveis$`área construída`- medias$`área construída`)/se$`área construída`
+
+processed.dados_imoveis$`idade da residência` <- (dados_imoveis$`idade da residência`-medias$`idade da residência`)/se$`idade da residência`
+
+processed.dados_imoveis
+```
+  
+Note que a análise descritiva para os dados transformados $x_{ij} = \frac{x_{ij}-\bar{x}_i}{s_i}$ é equivalente à análise anterior (dados não transformados)
+  
+```{r}
+par(mfrow=c(2,2))
+plot(dados_imoveis$`preço de venda do imóvel`,processed.dados_imoveis$`imposto do imóvel`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "imposto do imóvel (sem unidade)")
+plot(dados_imoveis$`preço de venda do imóvel`,processed.dados_imoveis$`área do terreno`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "área do terreno (sem unidade)")
+plot(dados_imoveis$`preço de venda do imóvel`,processed.dados_imoveis$`área construída`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "área construída (sem unidade)")
+plot(dados_imoveis$`preço de venda do imóvel`,processed.dados_imoveis$`idade da residência`,ylab = "preço de venda do imóvel (em 1000 USD)",xlab = "idade da residência (sem unidade)")
+```
+##Modelo
+```{r}
+fit.processed.dados_imoveis <- lm(processed.dados_imoveis$`preço de venda do imóvel`~processed.dados_imoveis$`imposto do imóvel`+processed.dados_imoveis$`área do terreno`+processed.dados_imoveis$`área construída`+processed.dados_imoveis$`idade da residência`)
+```
+    
+Analise Residual:
+  
+```{r}
+diagnorm(fit.processed.dados_imoveis)
+```
+
+  
+Resultados do ajuste:
+  
+```{r}
+results.fit.imoveis <- data.frame(summary(fit.processed.dados_imoveis)$coefficients)
+
+LIICs <-  results.fit.imoveis$Estimate - qnorm(0.975)*results.fit.imoveis$Std..Error
+
+LSICs <- results.fit.imoveis$Estimate + qnorm(0.975)*results.fit.imoveis$Std..Error
+
+tbl.fit.imoveis <- data.frame(cbind(results.fit.imoveis,LIICs,LSICs))
+colnames(tbl.fit.imoveis) <- c("Estimativa","Erro-padrão","Estat.t","p-valor","Limite inferior IC(95%)","Limite superior IC(95%)")
+rownames(tbl.fit.imoveis) <- c("B_0","B_1","B_2","B_3","B_4")
+tbl.fit.imoveis
+```
+
+Observando os p-valores para o teste de nulidade, concluimos que os parâmetros $B_2$ e $B_4$ não são significativos, ou seja, podemos utilizar um moledo reduzido excluindo do modelo as variáveis "área do terreno" e "idade da residência"
+
+
+##Modelo Reduzido
+
+
+```{r Modelo reduzido}
+fit2.processed.dados_imoveis <- lm(processed.dados_imoveis$`preço de venda do imóvel`~processed.dados_imoveis$`imposto do imóvel`+processed.dados_imoveis$`área construída`)
+```
+
+Analise Residual:
+  
+```{r}
+diagnorm(fit2.processed.dados_imoveis)
+```
+
+```{r}
+results.fit2.imoveis <- data.frame(summary(fit2.processed.dados_imoveis)$coefficients)
+
+LIICs <-  results.fit2.imoveis$Estimate - qnorm(0.975)*results.fit2.imoveis$Std..Error
+
+LSICs <- results.fit2.imoveis$Estimate + qnorm(0.975)*results.fit2.imoveis$Std..Error
+
+tbl.fit2.imoveis <- data.frame(cbind(results.fit2.imoveis,LIICs,LSICs))
+colnames(tbl.fit2.imoveis) <- c("Estimativa","Erro-padrão","Estat.t","p-valor","Limite inferior IC(95%)","Limite superior IC(95%)")
+rownames(tbl.fit2.imoveis) <- c("B_0","B_1","B_3")
+tbl.fit2.imoveis
+```
+
+##Teste CB
+
+Consideremos a seguinte Hipótese
+
+$$\beta_1=\beta_3$$
+Utilizaremos o teste $C\beta=0$ com:
+$$ C=\begin{bmatrix}
+0 & 1 & -1\\ 
+\end{bmatrix}$$
+```{r}
+c <- t(matrix(c(0,1,-1),3,1))
+testeF.CB(fit2.processed.dados_imoveis,c)
+```
+Note que o teste acima indica que $\beta_1 = \beta_3$
+
 # Exercício 5
 
 ```{r, cache=TRUE, echo=FALSE}
@@ -451,7 +401,6 @@ tesc <- c(rep("Convencional",26),rep("Hugger",26))# tipo de escova
 tescf <- factor(tesc,levels=c("Convencional","Hugger"))
 sex <- c(rep("F",14),rep("M",12),rep("F",14),rep("M",12))
 sexo = factor(sex,levels=c("F","M"))
-
 sexotescf = interaction(sexo,tescf)
 ```
 
@@ -594,13 +543,15 @@ Vemos que hápresença de heterocedasticidade.
 
 #### Testes
 
-Realizaremos o teste $C\beta=0$ para testarmos: $\beta_{1ij}=\beta_{2ij}=\beta_{3ij}=\beta_{4ij}$ com $$ 
+Realizaremos o teste $C\beta=0$ para testarmos: $\beta_{1ij}=\beta_{2ij}=\beta_{3ij}=\beta_{4ij}$ com 
 
+$$ 
 C=\begin{bmatrix}
 1 & -1  & 0 & 0\\ 
 1 & 0 & -1 & 0\\ 
 1 & 0 & 0 & -1 
-\end{bmatrix}$$
+\end{bmatrix}
+$$
 
 ```{r}
 (c=t(matrix(c(1,-1,0,0,1,0,-1,0,1,0,0,-1),4,3)))
@@ -629,6 +580,13 @@ $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 ```{r}
 result <- lm(ipbpos~-1+tescf+ipbpre:tescf)
 summary(result)
+```
+
+
+```{r}
+library(printr)
+model.result <- data.frame(model.matrix(result))
+model.result
 ```
 
 Observa-se que os interceptos parecem ser nulos e os coeficientes angulares sugerem uma superioridade da escova Hugger(quanto menor, melhor). 
