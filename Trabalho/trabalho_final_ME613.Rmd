@@ -1,12 +1,33 @@
 ---
-title: "Trabalho final ME613"
-author: "Henrique Capatto"
-date: "30 de novembro de 2016"
 output:
-  html_document: default
+      html_document: default
 ---
 
-
+<style type="text/css">
+  
+  body{ /* Normal  */
+      font-family: New Times Roman;
+      font-size: 10px;
+  }
+td {  /* Table  */
+    font-size: 10px;
+}
+h1 { /* Header 1 */
+    font-size: 20px;
+}
+h2 { /* Header 2 */
+    font-size: 22px;
+}
+h3 { /* Header 3 */
+    font-size: 18px;
+}
+code.r{ /* Code block */
+    font-size: 10px;
+}
+pre { /* Code block */
+    font-size: 10px
+}
+</style>
 
 
 ```{r pacotes,cache = TRUE,echo=FALSE, warning = FALSE, error = FALSE}
@@ -18,13 +39,18 @@ library(gridExtra)
 library(dplyr)
 #pacote que possui o conjunto de dados para o primeiro exercício
 library(car)
+#pacote para fazer legenda
+library(captioner)
 
+figs <- captioner(prefix="Figura")
+tbls <- captioner(prefix="Tabela")
 #instalacao de um pacote pra "printar" tabelas mais bonitinhas
 #install.packages(
 #  'printr',
 #  type = 'source',
 #  repos = c('http://yihui.name/xran', 'http://cran.rstudio.com')
 #)
+
 ```
 
 ```{r gráficos de resíduos,cache = TRUE,echo=FALSE}
@@ -181,7 +207,16 @@ print(m.M)
 
 ```
 
-# Exercício 1
+```{r legendas, echo=FALSE, cache=TRUE}
+# legenda para a primeira tabela(estats descr) do primeiro exercício
+legenda1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
+#legenda para o primeiro Boxplot
+
+
+```
+
+
+**Exercício 1**
 
 
 ```{r manipulacao_dados_exercicio_1, cache = TRUE ,echo = FALSE}
@@ -199,11 +234,12 @@ Altura = c(Altf$Altura,Altm$Altura)
 Alturamf = (Altura-mean(Altura))
 ```
 
-## Análise Descritiva
+*Análise Descritiva*
 
-### Estatísticas
+*Estatísticas*
 ```{r,cache = TRUE,echo=FALSE}
 library(printr)
+
 medias = aggregate(.~Sexo,dados_1[,-1],mean)
 dp = aggregate(.~Sexo,dados_1[,-1],sd)
 maxs = aggregate(.~Sexo,dados_1[,-1],max)
@@ -217,11 +253,12 @@ names(estat_descr)=c("Sexo","Média(Peso)","Média(Altura)","EP(Peso)","EP(Altur
 estat_descr
 ```
 
-### Gráficos
+`r legenda1`
 
-Boxplot's: 
 
-```{r,cache = TRUE,echo=FALSE}
+*Gráficos*
+
+```{r graf_box_1,cache = TRUE,echo=FALSE}
 # boxplot sexo x peso
 graf1 = ggplot(dados_1, aes(Sexo,Peso,fill=Sexo))
 graf1 = graf1+geom_boxplot()+labs(title = "Boxplot: Sexo x Peso" , x = "Sexo", y="Peso")
@@ -236,7 +273,7 @@ grid.arrange(graf1, graf2, nrow=1, ncol=2)
 
 ### Dispersão entre Altura e Peso (Desconsiderando o sexo)
 
-```{r, cache=TRUE,echo = FALSE}
+```{r disp_11, cache=TRUE,echo = FALSE}
 
 graf3 = ggplot(dados_1, aes(Altura,Peso))
 graf3+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" , x = "Altura", y="Peso")
@@ -246,7 +283,7 @@ graf3+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" ,
 
 ### Dispersão entre Altura e Peso (Considerando o sexo)
 
-```{r, cache=TRUE,echo = FALSE}
+```{r disp_12, cache=TRUE,echo = FALSE}
 # Dispersão entre Altura e Peso (feminino)
 graf4= ggplot(Altf, aes(Altura,Peso))
 graf4=graf4+geom_point()+labs(title = "Dispersão considerando o sexo feminino" , x = "Altura", y="Peso")
@@ -260,18 +297,18 @@ grid.arrange(graf4, graf5, nrow=1, ncol=2)
 
 ## Análise inferencial
 
-Como modelo inicial, proporemos um modelo
+Como modelo inicial, proporemos um modelo linear, considerando o intercepto
 
 
-### Modelo inicial proposto
+**Modelo 1**
 
-$$Y_{ij} = \beta_0{ij}+\beta_1{ij} (x_{ij}-)+\varepsilon_{ij}$$
+$$Y_{ij} = \beta_0{i}+\beta_1{ij} (x_{ij}-\bar{x})+\varepsilon_{ij}$$
 
-Com: $i = 1,\dots, 199$ e $j=1,2$
+Com: $i = 1,2$ e $j=1,\dots, 199$
 
 Significado dos parâmetros:
 
-$B_0{ij}$: Valor esperado de $Y_{ij}$(Peso do individuo i do sexo j) para quando o valor de $x_{ij}$() é igual ao valor dá média amostral.
+$B_0{ij}$: Valor esperado de $Y_{ij}$(Peso do individuo j do sexo i) para quando o valor de $x_{ij}$(Altura do individuo j do sexo i) é igual ao valor dá média amostral.
 
 $B_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
 
@@ -279,16 +316,28 @@ $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 
 ```{r,cache = TRUE,echo=FALSE}
 fit_1 = lm(Peso~-1+Sexo+(Alturamf:Sexo))
-summary(fit_1)
+resumo_fit_1 = summary(fit_1)
+coeff_fit_1 = resumo_fit_1$coefficients
+coeff_fit_1 = data.frame(round(as.double(coeff_fit_1[,1]),4),round(as.double(coeff_fit_1[,2]),4),round(as.double(coeff_fit_1[,3]),4),ifelse(as.double(coeff_fit_1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
+
+names(coeff_fit_1)=c("Estimado","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_modelo_11 = data.frame(rbind(AIC(fit_1),BIC(fit_1),logLik(fit_1)))
+colnames(medidas_modelo_11)=c("Modelo 1")
+rownames(medidas_modelo_11)=c("AIC","BIC","Log-Verossimilhança")
 
 #matriz de planejamento
 #View(data.frame(model.matrix(fit_1)))
 
 #step
-step(fit_1,direction="both")
+#step(fit_1,direction="both")
 ```
 
-Todos os parâmetros são significativos.
+Todos os parâmetros são significativos, ou seja, todos contribuem para regressão, visto que seus p-valores são menores que 0,05.
+
+Isso significa que há evidência de que eles são distintos de zero, 
+importando que há valores esperado de peso para indivíduos que tem altura média e, existe 
 
 
 ### Análise de resíduos para o modelo
@@ -311,3 +360,19 @@ envelnorm(fit_1)
 ```
 
 
+**Modelo 2**
+
+Considere o seguinte modelo quadrático, ainda com o fator Sexo:
+
+$$Y_{ij} = \beta_0{i}+\beta_1{ij} (x_{ij}-\bar{x})+\beta_2{ij} (x_{ij}-\bar{x})^
+{2}+\varepsilon_{ij}$$
+
+Com: $i = 1,2$ e $j=1,\dots, 199$
+
+Significado dos parâmetros:
+
+$B_0{ij}$: Valor esperado de $Y_{ij}$(Peso do individuo j do sexo i) para quando o valor de $x_{ij}$(Altura do individuo j do sexo i) é igual ao valor dá média amostral.
+
+$B_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
+
+$\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
