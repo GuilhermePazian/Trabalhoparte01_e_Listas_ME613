@@ -1,6 +1,7 @@
 ---
 output:
-      html_document: default
+  html_document: default
+  pdf_document: default
 ---
 
 <style type="text/css">
@@ -35,15 +36,23 @@ pre { /* Code block */
 library(ggplot2)
 # pacote que deixa os gráficos do ggplot lado a lado
 library(gridExtra)
-# pacote para manipulação de dados
+# pacotes para manipulação de dados
+library(reshape2)
+library(plyr)
 library(dplyr)
 #pacote que possui o conjunto de dados para o primeiro exercício
 library(car)
 #pacote para fazer legenda
 library(captioner)
 
+
+
 figs <- captioner(prefix="Figura")
 tbls <- captioner(prefix="Tabela")
+
+#inslação dos pacotes necessários
+#install.packages(C("tidyverse","gridExtra","car","captioner","gvlma"))
+
 #instalacao de um pacote pra "printar" tabelas mais bonitinhas
 #install.packages(
 #  'printr',
@@ -208,9 +217,17 @@ print(m.M)
 ```
 
 ```{r legendas, echo=FALSE, cache=TRUE}
+#legenda para as tabelas
+
 # legenda para a primeira tabela(estats descr) do primeiro exercício
-legenda1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
+legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
+
+
+
+#legendas para os gráficos
+
 #legenda para o primeiro Boxplot
+legenda_graf1 = figs(name="graf1_boxplot",caption = "Boxplot Comparativo")
 
 
 ```
@@ -223,6 +240,8 @@ legenda1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
 #retirada da observacao 12 e pegando só as variaveis sexo, peso e altura
 dados_1 = Davis[-12,1:3]
 names(dados_1)=c("Sexo","Peso","Altura")
+
+df <- melt(dados_1,id.vars = 1)
 
 Altf = subset(dados_1,Sexo=="F")
 Altm = subset(dados_1,Sexo=="M")
@@ -240,21 +259,21 @@ Alturamf = (Altura-mean(Altura))
 ```{r,cache = TRUE,echo=FALSE}
 library(printr)
 
-medias = aggregate(.~Sexo,dados_1[,-1],mean)
-dp = aggregate(.~Sexo,dados_1[,-1],sd)
-maxs = aggregate(.~Sexo,dados_1[,-1],max)
-mins = aggregate(.~Sexo,dados_1[,-1],min)
+df <- melt(dados_1,id.vars = 1)
+resumo <- ddply(df, c("Sexo","variable"), function(x) summary(x$value))
+dp = ddply(df, c("Sexo","variable"), function(x) sd(x$value))
+estat_descr = data.frame(resumo,dp[,3])
 
-estat_descr = data.frame(medias,dp,maxs,mins)
-
-estat_descr = estat_descr[c(-4,-7,-10)]
-names(estat_descr)=c("Sexo","Média(Peso)","Média(Altura)","EP(Peso)","EP(Altura)","Máximo(Peso)","Máximo(Altura)","Mínimo(Peso)","Mínimo(Altura)")
+names(estat_descr)=c("Sexo","Variável","Minímo","1ºQuartil","Mediana","Média","3ºQuartil","Máximo","Erro Padrão")
 
 estat_descr
 ```
 
-`r legenda1`
+`r legenda_table1`
 
+Podemos ver que o peso e a altura dos homens, em média, são maiores que os das mulheres. Podemos observar que em todas as estatísticas, os homens tem números superiores que as mulheres, incluindo uma maior variação nos dados, mostrada pelos valores de erro padrão.
+
+Esses padrôes são melhores visualizados no Boxplot da Figura 1
 
 *Gráficos*
 
@@ -270,6 +289,8 @@ graf2 = graf2 + geom_boxplot()+labs(title = "Boxplot: Sexo x Altura" , x = "Sexo
 grid.arrange(graf1, graf2, nrow=1, ncol=2)
 ```
 
+``r legenda_graf1`
+
 
 ### Dispersão entre Altura e Peso (Desconsiderando o sexo)
 
@@ -279,6 +300,8 @@ graf3 = ggplot(dados_1, aes(Altura,Peso))
 graf3+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" , x = "Altura", y="Peso")
 
 ```
+
+Nesse gráfico podemos observar que  
 
 
 ### Dispersão entre Altura e Peso (Considerando o sexo)
