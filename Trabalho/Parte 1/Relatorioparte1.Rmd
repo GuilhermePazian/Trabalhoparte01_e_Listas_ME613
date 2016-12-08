@@ -1,12 +1,16 @@
 ---
 title: ""
-geometry:  left=15mm, right=15mm, top=28.5mm, bottom=28.5mm
+geometry: textwidth=18cm,textheight=21cm
 setspace: doublespacing
 lang: pt-br
 header-includes:
 - \usepackage{setspace}
 - \usepackage{indentfirst}
-
+- \usepackage[utf8]{inputenc}
+- \usepackage{mathptmx}
+- \usepackage{enumerate}
+- \usepackage{url} 
+- \usepackage{lipsum}
 output:
   pdf_document:
   html_document: default
@@ -30,7 +34,7 @@ fontsize: 10pt
 \begin{minipage}[b]{0.7\linewidth}
 \begin{center}
 \vspace*{1cm}
- {\large\bf Universidade Estadual de Campinas\\[5pt]
+ {\large \bf Universidade Estadual de Campinas\\[5pt]
 Instituto de Matemática, Estatística e Computação Cientifica\\[3pt]
 Departamento de Estatística}
 \end{center}
@@ -40,18 +44,18 @@ Departamento de Estatística}
 \vspace*{\stretch{1}}
 \begin{center}
 \vspace*{5cm}
-{\huge \bf Relatório 1 \\[7pt]
+{\huge \bf Relatório - Parte I \\[7pt]
 Trabalho Final de ME613}
 \end{center}
 \vspace*{\stretch{1}}
 \begin{center}
 \vspace*{4cm}
-{\Large \bf Eliane Ramos de Siqueira  155233 \\
-Guilherme Pazian 160323 \\
-Henrique Capatto 146406 \\
-Murilo Salgado 150987 \break
-}\\[0.7cm]
-{\large Professor: Caio Azevedo}\\[5pt]
+{\Large \bf Eliane Ramos de Siqueira  RA:155233 \\
+Guilherme Pazian  RA:160323 \\
+Henrique Capatto  RA:146406 \\
+Murilo Salgado Razoli  RA:150987 \break
+}\\[3pt]
+{\large \bf Professor: Caio Lucidius Naberezny Azevedo}\\[5pt]
 \end{center}
 \vspace*{\stretch{1}}
 \centerline{\bf Campinas-SP, 06 de Dezembro de 2016}
@@ -264,13 +268,17 @@ legenda_graf2 = figs(name="graf2_dispersao",caption = "Dispersão entre as vari�
 legenda_graf3 = figs(name="graf3_dispersao",caption = "Dispersão entre as variáveis Altura e Peso considerando o sexo.")
 ```
 
-#1. Introdução
+\begin{enumerate}
+\item Introdução
+\end{enumerate}
+\vspace{0.3cm}
+\setlength{\parindent}{3em}
+  <p>O conjunto de dados analisado corresponde a informações de homens e mulheres envolvidos em exercícios regulares e apresenta para cada indivíduo, o peso(em kg) e altura(em cm) medidos e informados pelo mesmo. Além disso, o sexo de cada indivíduo também foi coletado, sendo que 112 são do sexo feminino e 88 são do sexo masculino, totalizando 200 pessoas.Os dados podem ser encontrados no R no pacote car, sob o nome "Davis".</p>\par
+<p>O objetivo é estudar o impacto da altura no peso, levando em consideração o sexo.</p>
+  <p>Utilizamos a metodologia dos modelos normais lineares homocedásticos, metodologias da qualidade do ajuste e comparação de modelos apropriados com o suporte computacional do R.</p>
+</p>
 
-O conjunto de dados analisado corresponde a informações de homens e mulheres envolvidos em exercícios regulares e apresenta para cada indivíduo, o peso(em kg) e altura(em cm) medidos e informados pelo mesmo. Além disso, o sexo de cada indivíduo também foi coletado, sendo que 112 são do sexo feminino e 88 são do sexo masculino, totalizando 200 pessoas.
- O objetivo é estudar o impacto da altura no peso, levando em consideração o sexo.
-  Os dados podem ser encontrados no R no pacote car, sob o nome "Davis".
-  Utilizamos a metodologia dos modelos normais lineares homocedásticos, metodologias da qualidade do ajuste e comparação de modelos apropriados.
-
+\vspace{1.5cm}
 
 ```{r manipulacao_dados_exercicio_1, cache = TRUE ,echo = FALSE}
 #retirada da observacao 12 e pegando só as variaveis sexo, peso e altura
@@ -289,14 +297,20 @@ Altura = c(Altf$Altura,Altm$Altura)
 Alturamf = (Altura-mean(Altura))
 ```
 
-#2.Análise descritiva
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item Análise descritiva
+\end{enumerate}
+\vspace{0.3cm}
 
-Observando a tabela 1, podemos ver que em média, o peso e a altura dos homens são maiores que os das mulheres. Além disso vemos valores superiores em todas as estatísticas, para os homens, incluindo uma maior variação nos dados, variação essa, mostrada pelos valores de erro padrão.
+Observando a tabela 1, podemos ver que em média, o peso e a altura dos homens são maiores que os das mulheres. Além disso vemos valores superiores em todas as estatísticas, para os homens, incluindo uma maior variação nos dados, variação essa, mostrada pelos valores de erro padrão.  
 
-  
+\vspace{1cm}
 \begin{center}
 `r legenda_table1`
 \end{center}
+
+
 ```{r,cache = TRUE,echo=FALSE}
 #estatísticas
 library(printr)
@@ -311,6 +325,7 @@ names(estat_descr)=c("Sexo","Variável","Minímo","1ºQuartil","Mediana","Média
 estat_descr
 ```
 
+\vspace{0.5cm}
 A figura 1 mostra um boxplot dos valores de peso por gênero e um boxplot dos valores de altura também por gênero. Observando-os podemos confirmar os padrões já identificados pelas estatísticas descritivas.
 
 ```{r graf_box_1,cache = TRUE,echo=FALSE, fig.height=3, fig.width=6,fig.align='center'}
@@ -326,12 +341,14 @@ graf2 = graf2 + geom_boxplot()+labs(title = "Boxplot: Sexo x Altura" , x = "Sexo
 grid.arrange(graf1, graf2, nrow=1, ncol=2)
 ```
 \begin{center}
-``r legenda_graf1`
+`r legenda_graf1`
 \end{center}
 
+\vspace{0.5cm}
 Na figura 2 abaixo, temos um gráfico de dispersão do peso em relação a altura dos indivíduos, desconsiderando o gênero. Podemos perceber que há uma relação positiva entre a váriavel resposta(peso) e a variável explicativa(altura), isto é, quanto maior a altura, maior o peso do indivíduo. Tal relação pode ser razoavelmente representada por uma reta ou uma curva quadrática.
 
-```{r disp_11, cache=TRUE,echo = FALSE,fig.align='center',fig.width=5.5,fig.height=3.5,warning=FALSE}
+\vspace{0.6cm}
+```{r disp_11, cache=TRUE,echo = FALSE,fig.align='center',fig.width=5.5,fig.height=3.4,warning=FALSE}
 # Dispersão entre Altura e Peso (Desconsiderando o sexo)
 graf3 = ggplot(dados_1, aes(Altura,Peso))
 graf3+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))
@@ -344,6 +361,7 @@ A figura 3 também apresenta os gráficos de dispersão entre a variável respos
 Podemos ver que para ambos os sexos,há uma relação positiva, o peso cresce a medida que a altura cresce. Além disso é possível notar a presença de um outlier para o sexo masculino, enquanto que para o sexo feminino podemos ver em torno de três outliers.
 Tanto para o sexo feminino quanto o masculino podemos ainda razoavelmente representar esta relação entre peso e altura por uma reta ou uma curva quadrática.
 
+\vspace{0.5cm}
 ```{r disp_12, cache=TRUE,echo = FALSE,fig.width=5.5,fig.height=3.5,fig.align='center', warning=FALSE}
 # Dispersão entre Altura e Peso (feminino)
 graf4= ggplot(Altf, aes(Altura,Peso))
@@ -358,25 +376,53 @@ grid.arrange(graf4, graf5, nrow=1, ncol=2)
 `r legenda_graf3`
 \end{center}
 
-#3.Análise Inferencial
-
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item Análise Inferencial
+\end{enumerate}
+\vspace{0.3cm}
   Devido ao objetivo em questão e aos resultados da análise descritiva, vamos considerar os seguintes modelos:
   
+  colocar os modelos, analise de residuo e bla bla bla
 
-#4.Conclusões
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item Conclusões
+\end{enumerate}
+\vspace{0.3cm}
+
+escrever conclusões<p>
+escrever conclusões<p>
+escrever conclusões<p>
+escrever conclusões
+escrever conclusões
+escrever conclusões
+\vspace{0.5cm}
 
 
+\begin{enumerate}
+\setcounter{enumi}{4}
+\item Referências Bibliográficas
+\end{enumerate}
 
-#5.Referências Bibliográficas
-
+\vspace{0.3cm}
 \begin{itemize}
-
-\item Faraway, J. J. (2014). Linear Models with R, Second Edition, Chapman &
-Hall/CRC Texts in Statistical Science
-
-\item Item 2
-
-\end{itemize}
-#6.Apêndice
+  \item Azevedo, C. L. N (2016). Notas de aula sobre planejamento e análise de experimentos,\url{http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_20
+16.htm}
+  \item Faraway, J. J. (2014). Linear Models with R, Second Edition,Chapman e Hall/CRC Texts in Statistical Science
+  \item Draper, N. R. and Smith, H. (1998). Applied regression analysis, third edition. New York, NY: John Wiley e Sons.
+  \item Paula, G. A. (2013). Modelos de regressão com apoio computacional, versão pré-eliminar \url{ https://www.ime.usp.br/~giapaula/texto_2013.pdf}
   
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item Apêndice
+\end{enumerate}
+\vspace{0.3cm}
+
 
