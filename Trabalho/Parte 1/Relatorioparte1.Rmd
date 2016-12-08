@@ -360,6 +360,8 @@ grid.arrange(graf4, graf5, nrow=1, ncol=2)
 
 #3.Análise Inferencial
 
+  Devido ao objetivo em questão e aos resultados da análise descritiva, vamos considerar os seguintes modelos:
+  
 
 #4.Conclusões
 
@@ -367,7 +369,14 @@ grid.arrange(graf4, graf5, nrow=1, ncol=2)
 
 #5.Referências Bibliográficas
 
+\begin{itemize}
 
+\item Faraway, J. J. (2014). Linear Models with R, Second Edition, Chapman &
+Hall/CRC Texts in Statistical Science
+
+\item Item 2
+
+\end{itemize}
 #6.Apêndice
   
 
