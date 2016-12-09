@@ -9,3 +9,8 @@ captioner
 printr
 knitr
 xtable
+tidyverse
+tibble
+tidyr
+readr
+purrr
