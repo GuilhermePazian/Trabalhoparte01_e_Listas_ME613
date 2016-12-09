@@ -4,14 +4,14 @@ geometry: textwidth=18cm,textheight=21cm
 setspace: doublespacing
 lang: pt-br
 header-includes:
-- \usepackage{setspace}
-- \usepackage{indentfirst}
+- \usepackage{setspace} #pacote para espaçõ duplo
+- \usepackage{indentfirst} #pacote para identação
 - \usepackage[utf8]{inputenc}
 - \usepackage{mathptmx}
 - \usepackage{enumerate}
-- \usepackage{url} 
+- \usepackage{url} #pacote para iserir link
 - \usepackage{lipsum}
-- \usepackage{multirow}
+- \usepackage{multirow} #pacote para mesclar linhas de tabela
 output:
   pdf_document:
   html_document: default
@@ -80,8 +80,6 @@ library(dplyr)
 library(car)
 #pacote para fazer legenda
 library(captioner)
-
-
 
 figs <- captioner(prefix="Figura")
 tbls <- captioner(prefix="Tabela")
@@ -258,7 +256,6 @@ print(m.M)
 # legenda para a primeira tabela(estats descr) do primeiro exercício
 legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
 legenda_table2 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
-
 
 #legendas para os gráficos
 
@@ -444,6 +441,7 @@ rownames(medidas_modelo_1)=c("AIC","BIC","Log-Verossimilhança")
 #library(xtable)
 #print(xtable(coeff_fit_1))
 ```
+\vspace{1cm}
 Modelo 2
 
 $$Y_{ij} = \beta_0{i}+\beta_1{ij} (x_{ij}-\bar{x})+\beta_2{ij} (x_{ij}-\bar{x})^
@@ -459,8 +457,12 @@ Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 \item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
 \item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
 \item $\beta_{0i}$: Peso esperado indivíduo do i-ésimo sexo, quando sua altura é igual a média.
-\item $\beta_1{i}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
-\item O pode-se avaliar o significado $\frac{-\beta_1i}{2\beta_2i}$ como o valor máximo ou mínimo de peso
+\item $\beta_1{i}$: Incremento(positivo ou negativo) no peso quando se aumenta em uma unidade o valor da altura.
+
+\item $\beta_2{ij}$:
+
+\item $\frac{-\beta_1i}{2\beta_2i}$: Valor da altura para o qual o peso esperado é máximo ou mínimo.
+
 \end{itemize}
 
 ```{r,cache = TRUE,echo=FALSE}
@@ -502,7 +504,8 @@ Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 
 \item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
 \item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
-\item $\beta_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
+\item $\beta_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta em uma unidade o valor da altura.
+
 
 \end{itemize}
 ```{r,cache = TRUE,echo=FALSE}
@@ -528,7 +531,7 @@ rownames(medidas_modelo_3)=c("AIC","BIC","Log-Verossimilhança")
 #print(xtable(coeff_fit_3))
 ```
 
-
+\vspace{1cm}
 Modelo 4
 
 Considere o seguinte modelo quadrático, ainda com o fator Sexo:
@@ -545,8 +548,9 @@ Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 \item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
 \item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
 \item $B_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
-\end{itemize}
+\item $\beta_2{ij}$:
 
+\end{itemize}
 
 
 ```{r,cache = TRUE,echo=FALSE}
@@ -570,14 +574,12 @@ rownames(medidas_modelo_4)=c("AIC","BIC","Log-Verossimilhança")
 #print(xtable(coeff_fit_4))
 ```
 
+\vspace{1cm}
 
-\vspace{2cm}
+Para o modelo 1, na figura 4, podemos notar pelo gráfico A que uma observação se destaca das demais, porém não temos indícios que possa levar a uma conclusão sobre a dependência dos dados. Já pelo gráfico B(resíduos X valores ajustados), nota-se uma possível heterocedasticidade uma vez que, a variabilidade dos resíduos parece aumentar com o aumento do valor preditos, comportando-se de maneira mais discrepante para valores preditos maiores. 
+Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que possívelmente pode indicar que uma distribuição assimétrica com caudas mais pesadas que a distribuição Normal poderia ser consideradas à análise.
+Além disso, o gráfico de envelopes, na figura 5, acusa um mal ajuste, devido ao comportamente levemente sistemático.
 
-Para o modelo 1, como mostra a figura 4, podemos notar pelo gráfico A que uma observação se destaca das demais, porém não temos indícios que possa levar a uma conclusão sobre a dependência dos dados. Já o gráfico B, nota-se uma possível heterocedasticidade nos dados pois entre
-os valores ajustados de 50 a 80, os resíduos parecem se comportar de maneira mais discrepante em relação aos valores maiores que 80. 
-Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que pode indicar que uma distribuição assimétrica com caudas mais pesadas que a distribuição Normal poderiam ser consideradas à análise.
-O gráfico de envelopes, na figura 5, mostra uma pequena tendência e alguns pontos fora dos **encontrar uma palavra**, o que sugere uma não normalidade dos dados.
- 
 Para o modelo 2,...
 
 Para o modelo 3, obsevamos na figura 8 que há uma tendência no gráfico B, o que indica um possível heterocedasticidade. Nota-se pelos gráficos C e D, uma leve assimetria positiva, com presença de outliers no gráfico D.
@@ -586,7 +588,7 @@ O gráfico de envelopes para o terceiro modelo, na figura 9, apresenta uma tend�
 Para o quarto e último modelo,na figura 10 temos um ponto discrepante, nos gráficos A e B. Pelo gráfico A, não há evidências para afirmar qualquer conclusão sobre a dependência dos dados. No gráfico B, notamos um pequeno agrupamento dos dados e logo depois uma pequena dispersão dos mesmos, tal tendência, sugere uma possível heterocedasticidade dos dados.Ambos os gráficos C e D, mostram uma leva assimetria positiva, onde no gráfico C, temos uma maior concentração da densidade entre os valores -2 e 2, e no gráfico D, temos a presença de outliers, tanto abaixo como acima da média.
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
-##Análise de resíduos para o modelo 1 - COLOCAR NO FINAL
+#Análise de resíduos para o modelo 1
 diag2norm(fit_1)
 ```
 \begin{center}
@@ -594,6 +596,7 @@ diag2norm(fit_1)
 \end{center}
 
 ```{r,echo =FALSE,fig.width=6.5,fig.height=4,fig.align='center'}
+#gráfico de envelopes do modelo 1
 envelnorm(fit_1)
 ```
 
@@ -603,6 +606,7 @@ envelnorm(fit_1)
 
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+##Análise de resíduos para o modelo 2
 diag2norm(fit_2)
 ```
 
@@ -611,6 +615,7 @@ diag2norm(fit_2)
 \end{center}
 
 ```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center'}
+#gráfico de envelopes do modelo 2
 envelnorm(fit_2)
 ```
 
@@ -619,6 +624,7 @@ envelnorm(fit_2)
 \end{center}
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+#Análise de resíduos para o modelo 3
 diag2norm(fit_3)
 ```
 
@@ -627,6 +633,7 @@ diag2norm(fit_3)
 \end{center}
 
 ```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center'}
+#gráfico de envelopes do modelo 3
 envelnorm(fit_3)
 ```
 
@@ -635,6 +642,7 @@ envelnorm(fit_3)
 \end{center}
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+##Análise de resíduos para o modelo 4
 diag2norm(fit_4)
 ```
 
@@ -643,6 +651,7 @@ diag2norm(fit_4)
 \end{center}
 
 ```{r,echo = FALSE,fig.width=7,fig.height=4, fig.align='center'}
+#gráfico de envelopes do modelo 4
 envelnorm(fit_4)
 ```
 
@@ -651,6 +660,7 @@ envelnorm(fit_4)
 \end{center}
 
 ```{r, echo=F}
+#tabela das estimativas
 tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
 #fazer intervalo de confiança
 #library(xtable)
@@ -692,6 +702,25 @@ Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
 \end{tabular}
 \end{table}
 
+```{r, echo=FALSE}
+tabela_medidas_modelos=cbind(medidas_modelo_1,medidas_modelo_2,medidas_modelo_3,medidas_modelo_4)
+#library(xtable)
+#print(xtable(tabela_medidas_modelos))
+```
+
+ \begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+\hline
+& Modelo 1 & Modelo 2 & Modelo 3 & Modelo 4 \\
+\hline
+AIC & 1421.57 & 1403.02 & 1417.30 & 1400.14 \\
+BIC & 1431.45 & 1426.07 & 1427.18 & 1416.60 \\
+Log-Verossimilhança & -707.79 & -694.51 & -705.65 & -695.07 \\
+\hline
+\end{tabular}
+\end{table}
+
 \newpage
 \vspace{0.5cm}
 \begin{enumerate}
@@ -729,7 +758,6 @@ escrever conclusões
 
 \vspace{0.5cm}
 
-\newpage
 \begin{enumerate}
 \setcounter{enumi}{5}
 \item Apêndice
