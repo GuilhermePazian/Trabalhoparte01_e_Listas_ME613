@@ -256,7 +256,7 @@ print(m.M)
 # legenda para a primeira tabela(estats descr) do primeiro exercício
 legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
 legenda_table2 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
-
+legenda_table3 = tbls(name="table_aic_bic",caption = "Comparação dos modelos")
 #legendas para os gráficos
 
 #legenda para o primeiro Boxplot
@@ -702,6 +702,10 @@ Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
 \end{tabular}
 \end{table}
 
+\vspace{1cm}
+\begin{center}
+`r legenda_table3`
+\end{center}
 ```{r, echo=FALSE}
 tabela_medidas_modelos=cbind(medidas_modelo_1,medidas_modelo_2,medidas_modelo_3,medidas_modelo_4)
 #library(xtable)
