@@ -7,3 +7,5 @@ dplyr
 car
 captioner
 printr
+knitr
+xtable

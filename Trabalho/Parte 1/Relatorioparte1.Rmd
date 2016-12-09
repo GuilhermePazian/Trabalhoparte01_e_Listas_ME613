@@ -11,6 +11,7 @@ header-includes:
 - \usepackage{enumerate}
 - \usepackage{url} 
 - \usepackage{lipsum}
+- \usepackage{multirow}
 output:
   pdf_document:
   html_document: default
@@ -256,7 +257,7 @@ print(m.M)
 
 # legenda para a primeira tabela(estats descr) do primeiro exercício
 legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
-
+legenda_table2 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
 
 
 #legendas para os gráficos
@@ -266,6 +267,16 @@ legenda_graf1 = figs(name="graf1_boxplot",caption = "Boxplot Comparativo")
 #legenda para o primeiro grárico de dispersão
 legenda_graf2 = figs(name="graf2_dispersao",caption = "Dispersão entre as variáveis Altura e Peso")
 legenda_graf3 = figs(name="graf3_dispersao",caption = "Dispersão entre as variáveis Altura e Peso considerando o sexo.")
+legenda_graf4 = figs(name="graf4_analiseresidual",caption = "Análise residual para o modelo 1")
+legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 1")
+legenda_graf6 = figs(name="graf6_analiseresidual",caption = "Análise residual para o modelo 2")
+legenda_graf7 = figs(name="graf7_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 2")
+legenda_graf8 = figs(name="graf8_analiseresidual",caption = "Análise residual para o modelo 3")
+legenda_graf9 = figs(name="graf9_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 3")
+legenda_graf10 = figs(name="graf10_analiseresidual",caption = "Análise residual para o modelo 4")
+legenda_graf11 = figs(name="graf11_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 4")
+
+
 ```
 
 \begin{enumerate}
@@ -382,10 +393,309 @@ grid.arrange(graf4, graf5, nrow=1, ncol=2)
 \item Análise Inferencial
 \end{enumerate}
 \vspace{0.3cm}
-  Devido ao objetivo em questão e aos resultados da análise descritiva, vamos considerar os seguintes modelos:
-  
-  colocar os modelos, analise de residuo e bla bla bla
+ 
+Devido ao objetivo em questão e aos resultados da análise descritiva, vamos considerar quatro modelos e verificar qual deles é o mais reduzido e melhor se ajusta aos dados.
 
+Para os dois primeiros, consideramos modelos com intercepto, o primeiro deles, é um modelo linear centrado na média, enquanto que o segundo é um modelo quadrático também centrado na média. Esses dois modelos nos permite identificar se o intercepto modifica as análises sobre a significância da covariável sexo.
+
+ Para os outros dois, consideramos o modelo sem intecepto, onde o primeiro deles é modelo linear e o segundo, um modelo quadrático. Tal sugestão foi feita, pois além dos objetivos descritos acima, desejamos identificar se esses modelos fornecem informação relevante, mesmo contendo menos paramêtros.
+
+Dado a natureza dos dados, não faz sentido observarmos algum valor diferente de zero para a variavel resposta quando a variavel explicativa for é igual a zero, por isso, os modelos com intercepto sugeridos são todos centrados na média.
+
+Modelo 1
+
+$$Y_{ij} = \beta_{0i}+\beta_{1ij} (x_{ij}-\bar{x})+\varepsilon_{ij} \left\{\begin{matrix}
+i=1,2\\ 
+j=1,\dots, 199\\ 
+\end{matrix}\right.$$
+
+Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$.
+\vspace{0.3cm}
+\begin{itemize}
+
+\item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
+\item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
+\item $\beta_{0i}$: Peso esperado indivíduo do i-ésimo sexo, quando sua altura é igual a média.
+
+\item $\beta_{1ij}$: Incremento (positivo ou negativo) no peso esperado do j-ésimo indivíduo do i-ésimo sexo, para o aumento em uma unidade na altura.
+
+\end{itemize}
+
+```{r,cache = TRUE,echo=FALSE}
+#análise para o modelo 1
+fit_1 = lm(Peso~(Alturamf))
+resumo_fit_1 = summary(fit_1)
+coeff_fit_1 = resumo_fit_1$coefficients
+coeff_fit_1 = data.frame(round(as.double(coeff_fit_1[,1]),4),round(as.double(coeff_fit_1[,2]),4),round(as.double(coeff_fit_1[,3]),4),ifelse(as.double(coeff_fit_1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
+
+names(coeff_fit_1)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_modelo_1 = data.frame(rbind(AIC(fit_1),BIC(fit_1),logLik(fit_1)))
+colnames(medidas_modelo_1)=c("Modelo 1")
+rownames(medidas_modelo_1)=c("AIC","BIC","Log-Verossimilhança")
+
+#matriz de planejamento
+#View(data.frame(model.matrix(fit_1)))
+
+#step
+#step(fit_1,direction="both")
+#visualização da tabela
+#library(xtable)
+#print(xtable(coeff_fit_1))
+```
+Modelo 2
+
+$$Y_{ij} = \beta_0{i}+\beta_1{ij} (x_{ij}-\bar{x})+\beta_2{ij} (x_{ij}-\bar{x})^
+{2}+\varepsilon_{ij}\left\{\begin{matrix}
+i=1,2\\ 
+j=1,\dots, 199\\ 
+\end{matrix}\right.$$
+
+Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
+\vspace{0.3cm}
+\begin{itemize}
+
+\item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
+\item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
+\item $\beta_{0i}$: Peso esperado indivíduo do i-ésimo sexo, quando sua altura é igual a média.
+\item $\beta_1{i}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
+\item O pode-se avaliar o significado $\frac{-\beta_1i}{2\beta_2i}$ como o valor máximo ou mínimo de peso
+\end{itemize}
+
+```{r,cache = TRUE,echo=FALSE}
+Alturamf2=Alturamf^2
+
+fit_2 = lm(Peso~-1+Sexo+(Alturamf:Sexo)+(Alturamf2:Sexo))
+resumo_fit_2 = summary(fit_2)
+coeff_fit_2 = resumo_fit_2$coefficients
+coeff_fit_2 = data.frame(round(as.double(coeff_fit_2[,1]),4),round(as.double(coeff_fit_2[,2]),4),round(as.double(coeff_fit_2[,3]),4),ifelse(as.double(coeff_fit_2[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_2[,4]),4)))
+
+names(coeff_fit_2)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_modelo_2 = data.frame(rbind(AIC(fit_2),BIC(fit_2),logLik(fit_2)))
+colnames(medidas_modelo_2)=c("Modelo 2")
+rownames(medidas_modelo_2)=c("AIC","BIC","Log-Verossimilhança")
+
+#matriz de planejamento
+#View(data.frame(model.matrix(fit_1)))
+
+#step
+#step(fit_1,direction="both")
+#library(xtable)
+#print(xtable(coeff_fit_2))
+```
+
+\vspace{1cm}
+Modelo 3
+
+$$Y_{ij} = \beta_1{i} (x_{ij})+\varepsilon_{ij}\left\{\begin{matrix}
+i=1,2\\ 
+j=1,\dots, 199\\ 
+\end{matrix}\right.$$
+
+Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
+
+\vspace{0.3cm}
+\begin{itemize}
+
+\item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
+\item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
+\item $\beta_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
+
+\end{itemize}
+```{r,cache = TRUE,echo=FALSE}
+#analise para o modelo 3
+fit_3 = lm(Peso~-1+(Altura:Sexo))
+resumo_fit_3 = summary(fit_3)
+coeff_fit_3 = resumo_fit_3$coefficients
+coeff_fit_3 = data.frame(round(as.double(coeff_fit_1[,1]),4),round(as.double(coeff_fit_1[,2]),4),round(as.double(coeff_fit_1[,3]),4),ifelse(as.double(coeff_fit_1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
+
+names(coeff_fit_3)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_modelo_3 = data.frame(rbind(AIC(fit_3),BIC(fit_3),logLik(fit_3)))
+colnames(medidas_modelo_3)=c("Modelo 3")
+rownames(medidas_modelo_3)=c("AIC","BIC","Log-Verossimilhança")
+
+#matriz de planejamento
+#View(data.frame(model.matrix(fit_1)))
+
+#step
+#step(fit_1,direction="both")
+#library(xtable)
+#print(xtable(coeff_fit_3))
+```
+
+
+Modelo 4
+
+Considere o seguinte modelo quadrático, ainda com o fator Sexo:
+
+$$Y_{ij} = \beta_1{i} (x_{ij})+\beta_2{i} (x_{ij})^{2}+\varepsilon_{ij}\left\{\begin{matrix}
+i=1,2\\ 
+j=1,\dots, 199\\ 
+\end{matrix}\right.$$
+
+Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
+
+\vspace{0.3cm}
+\begin{itemize}
+\item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
+\item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
+\item $B_1{ij}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
+\end{itemize}
+
+
+
+```{r,cache = TRUE,echo=FALSE}
+#analises para o modelo 4
+alt2 = Altura^2
+fit_4 = lm(Peso~-1+(Altura:Sexo)+(alt2:Sexo))
+resumo_fit_4 = summary(fit_4)
+coeff_fit_4 = resumo_fit_4$coefficients
+coeff_fit_4 = data.frame(round(as.double(coeff_fit_4[,1]),4),round(as.double(coeff_fit_4[,2]),4),round(as.double(coeff_fit_4[,3]),4),ifelse(as.double(coeff_fit_4[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
+
+names(coeff_fit_4)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_modelo_4 = data.frame(rbind(AIC(fit_4),BIC(fit_4),logLik(fit_4)))
+colnames(medidas_modelo_4)=c("Modelo 4")
+rownames(medidas_modelo_4)=c("AIC","BIC","Log-Verossimilhança")
+
+#matriz de planejamento
+#View(data.frame(model.matrix(fit_1)))
+#library(xtable)
+#print(xtable(coeff_fit_4))
+```
+
+
+\vspace{2cm}
+
+Para o modelo 1, como mostra a figura 4, podemos notar pelo gráfico A que uma observação se destaca das demais, porém não temos indícios que possa levar a uma conclusão sobre a dependência dos dados. Já o gráfico B, nota-se uma possível heterocedasticidade nos dados pois entre
+os valores ajustados de 50 a 80, os resíduos parecem se comportar de maneira mais discrepante em relação aos valores maiores que 80. 
+Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que pode indicar que uma distribuição assimétrica com caudas mais pesadas que a distribuição Normal poderiam ser consideradas à análise.
+O gráfico de envelopes, na figura 5, mostra uma pequena tendência e alguns pontos fora dos **encontrar uma palavra**, o que sugere uma não normalidade dos dados.
+ 
+\vspace{1cm}
+
+
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+##Análise de resíduos para o modelo 1 - COLOCAR NO FINAL
+diag2norm(fit_1)
+```
+
+\begin{center}
+`r legenda_graf4`
+\end{center}
+
+envelope1
+```{r,echo =FALSE,fig.width=8,fig.height=5,fig.align='center'}
+envelnorm(fit_1)
+```
+
+\begin{center}
+`r legenda_graf5`
+\end{center}
+
+### Análise de resíduos para o modelo 2
+
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+diag2norm(fit_2)
+```
+
+\begin{center}
+`r legenda_graf6`
+\end{center}
+
+```{r,echo = FALSE,fig.align='center'}
+envelnorm(fit_2)
+```
+
+\begin{center}
+`r legenda_graf7`
+\end{center}
+
+### Análise de resíduos para o modelo3
+
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+diag2norm(fit_3)
+```
+
+\begin{center}
+`r legenda_graf8`
+\end{center}
+
+```{r,echo = FALSE,fig.align='center'}
+envelnorm(fit_3)
+```
+
+\begin{center}
+`r legenda_graf9`
+\end{center}
+
+### Análise de resíduos para o modelo4
+
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+diag2norm(fit_4)
+```
+
+\begin{center}
+`r legenda_graf10`
+\end{center}
+
+```{r,echo = FALSE,fig.align='center'}
+envelnorm(fit_4)
+```
+
+\begin{center}
+`r legenda_graf11`
+\end{center}
+
+```{r, echo=F}
+tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
+#fazer intervalo de confiança
+#library(xtable)
+#print(xtable(tabelaestimativas))
+```
+\vspace{1cm}
+\begin{center}
+`r legenda_table2`
+\end{center}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{cccccc}
+\hline
+Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
+\hline
+\multirow{2}{*}{Modelo 1}
+ & $\beta_{01}$ & 65,30 & 0,60 & 108,07 & $<$0,0001 \\
+ & $\beta_{02}$ & 1,15 & 0,07 & 16,98 & $<$0,0001 \\
+\hline
+\multirow{6}{*}{Modelo 2}
+ & $\beta_{01}$ & 60,48 & 1,12 & 54,20 & $<$0,0001 \\
+ & $\beta_{02}$ & 68,30 & 1,35 & 50,50 & $<$0,0001 \\
+ & $\beta_{11}$ & 0,52 & 0,25 & 2,07 & 0,0397 \\
+ & $\beta_{12}$ & 1,15 & 0,27 & 4,24 & $<$0,0001 \\
+ & $\beta_{21}$ & -0,01 & 0,02 & -0,46 & 0,6427 \\
+ & $\beta_{22}$ & -0,01 & 0,01 & -0,66 & 0,5075 \\
+\hline
+\multirow{2}{*}{Modelo 3}
+ & $\beta_{11}$ & 65,30 & 0,60 & 108,07 & 1 \\
+ & $\beta_{12}$ & 1,15 & 0,07 & 16,98 & 1 \\
+\hline
+\multirow{4}{*}{Modelo 4}
+ & $\beta_{11}$ & 0,07 & 0,14 & 0,51 & 1 \\
+ & $\beta_{12}$ & -0,14 & 0,13 & -1,01 & 1 \\
+ & $\beta_{21}$ & 0,00 & 0,00 & 2,03 & 1 \\
+ & $\beta_{22}$ & 0,00 & 0,00 & 4,21 & $<$0,0001 \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
 \vspace{0.5cm}
 \begin{enumerate}
 \setcounter{enumi}{3}
@@ -401,7 +711,7 @@ escrever conclusões
 escrever conclusões
 \vspace{0.5cm}
 
-
+\newpage
 \begin{enumerate}
 \setcounter{enumi}{4}
 \item Referências Bibliográficas
@@ -411,14 +721,18 @@ escrever conclusões
 \begin{itemize}
   \item Azevedo, C. L. N (2016). Notas de aula sobre planejamento e análise de experimentos,\url{http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_20
 16.htm}
+  \vspace{0.5cm}
   \item Faraway, J. J. (2014). Linear Models with R, Second Edition,Chapman e Hall/CRC Texts in Statistical Science
+  \vspace{0.5cm}
   \item Draper, N. R. and Smith, H. (1998). Applied regression analysis, third edition. New York, NY: John Wiley e Sons.
+  \vspace{0.5cm}
   \item Paula, G. A. (2013). Modelos de regressão com apoio computacional, versão pré-eliminar \url{ https://www.ime.usp.br/~giapaula/texto_2013.pdf}
   
 \end{itemize}
 
 \vspace{0.5cm}
 
+\newpage
 \begin{enumerate}
 \setcounter{enumi}{5}
 \item Apêndice
