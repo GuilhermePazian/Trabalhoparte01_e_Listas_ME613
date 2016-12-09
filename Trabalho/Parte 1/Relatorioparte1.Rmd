@@ -578,20 +578,22 @@ os valores ajustados de 50 a 80, os resíduos parecem se comportar de maneira ma
 Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que pode indicar que uma distribuição assimétrica com caudas mais pesadas que a distribuição Normal poderiam ser consideradas à análise.
 O gráfico de envelopes, na figura 5, mostra uma pequena tendência e alguns pontos fora dos **encontrar uma palavra**, o que sugere uma não normalidade dos dados.
  
-\vspace{1cm}
+Para o modelo 2,...
 
+Para o modelo 3, obsevamos na figura 8 que há uma tendência no gráfico B, o que indica um possível heterocedasticidade. Nota-se pelos gráficos C e D, uma leve assimetria positiva, com presença de outliers no gráfico D.
+O gráfico de envelopes para o terceiro modelo, na figura 9, apresenta uma tendência e novamente,vários pontos fora dos limites, sugerindo assim, uma falta de normalidade.
+
+Para o quarto e último modelo,na figura 10 temos um ponto discrepante, nos gráficos A e B. Pelo gráfico A, não há evidências para afirmar qualquer conclusão sobre a dependência dos dados. No gráfico B, notamos um pequeno agrupamento dos dados e logo depois uma pequena dispersão dos mesmos, tal tendência, sugere uma possível heterocedasticidade dos dados.Ambos os gráficos C e D, mostram uma leva assimetria positiva, onde no gráfico C, temos uma maior concentração da densidade entre os valores -2 e 2, e no gráfico D, temos a presença de outliers, tanto abaixo como acima da média.
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
 ##Análise de resíduos para o modelo 1 - COLOCAR NO FINAL
 diag2norm(fit_1)
 ```
-
 \begin{center}
 `r legenda_graf4`
 \end{center}
 
-envelope1
-```{r,echo =FALSE,fig.width=8,fig.height=5,fig.align='center'}
+```{r,echo =FALSE,fig.width=6.5,fig.height=4,fig.align='center'}
 envelnorm(fit_1)
 ```
 
@@ -599,7 +601,6 @@ envelnorm(fit_1)
 `r legenda_graf5`
 \end{center}
 
-### Análise de resíduos para o modelo 2
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
 diag2norm(fit_2)
@@ -609,15 +610,13 @@ diag2norm(fit_2)
 `r legenda_graf6`
 \end{center}
 
-```{r,echo = FALSE,fig.align='center'}
+```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center'}
 envelnorm(fit_2)
 ```
 
 \begin{center}
 `r legenda_graf7`
 \end{center}
-
-### Análise de resíduos para o modelo3
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
 diag2norm(fit_3)
@@ -627,15 +626,13 @@ diag2norm(fit_3)
 `r legenda_graf8`
 \end{center}
 
-```{r,echo = FALSE,fig.align='center'}
+```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center'}
 envelnorm(fit_3)
 ```
 
 \begin{center}
 `r legenda_graf9`
 \end{center}
-
-### Análise de resíduos para o modelo4
 
 ```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
 diag2norm(fit_4)
@@ -645,7 +642,7 @@ diag2norm(fit_4)
 `r legenda_graf10`
 \end{center}
 
-```{r,echo = FALSE,fig.align='center'}
+```{r,echo = FALSE,fig.width=7,fig.height=4, fig.align='center'}
 envelnorm(fit_4)
 ```
 
