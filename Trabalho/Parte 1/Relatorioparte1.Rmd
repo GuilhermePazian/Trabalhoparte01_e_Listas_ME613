@@ -384,7 +384,7 @@ estat_descr
 \vspace{0.5cm}
 A figura 1 mostra um boxplot dos valores de peso por gênero e um boxplot dos valores de altura também por gênero. Observando-os podemos confirmar os padrões já identificados pelas estatísticas descritivas.
 
-```{r graf_box_1,cache = TRUE,echo=FALSE, fig.height=3, fig.width=6,fig.align='center',warning=FALSE,message=FALSE}
+```{r graf_box_1,cache = TRUE,echo=FALSE, fig.height=3, fig.width=6.5,fig.align='center',warning=FALSE,message=FALSE}
 #gráficos
 # boxplot sexo x peso
 graf1 = ggplot(dados_1, aes(Sexo,Peso,fill=Sexo))
@@ -416,7 +416,7 @@ Podemos ver que para ambos os sexos,há uma relação positiva, o peso cresce a 
 Tanto para o sexo feminino quanto o masculino podemos ainda razoavelmente representar esta relação entre peso e altura por uma reta ou uma curva quadrática.
 
 \vspace{0.5cm}
-```{r disp_12, cache=TRUE,echo = FALSE,fig.width=5.5,fig.height=3.5,fig.align='center',warning=FALSE,message=FALSE}
+```{r disp_12, cache=TRUE,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',warning=FALSE,message=FALSE}
 # Dispersão entre Altura e Peso (feminino)
 graf4= ggplot(Altf, aes(Altura,Peso))
 graf4=graf4+geom_point()+labs(title = "Sexo Feminino" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))+theme_light()
@@ -675,7 +675,7 @@ diag2norm(fit_2)
 `r legenda_graf6`
 \end{center}
 
-```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
+```{r,echo = FALSE,fig.width=6.5,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 2
 envelnorm(fit_2)
 ```
@@ -693,7 +693,7 @@ diag2norm(fit_3)
 `r legenda_graf8`
 \end{center}
 
-```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
+```{r,echo = FALSE,fig.width=6.5,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 3
 envelnorm(fit_3)
 ```
@@ -711,7 +711,7 @@ diag2norm(fit_4)
 `r legenda_graf10`
 \end{center}
 
-```{r,echo = FALSE,fig.width=7,fig.height=4, fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
+```{r,echo = FALSE,fig.width=6.5,fig.height=4, fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 4
 envelnorm(fit_4)
 ```
@@ -777,72 +777,73 @@ $R^2$ Ajustado & `r rqmodel1` & `r rqmodel2` & `r rqmodel3` & `r rqmodel4` \\
 ```{r, echo=F,warning=FALSE,message=FALSE}
 #tabela das estimativas
 tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
-#fazer intervalo de confiança
+#library(knitr)
+#kable(tabelaestimativas)
+
 #library(xtable)
-#print(xtable(tabelaestimativas))
+#print(xtable(tabelaestimativas,digits = 4))
 ```
 
-
+\newpage
 \vspace{1cm}
 \begin{center}
 `r legenda_table3`
 \end{center}
 
 \begin{table}[!h]
-\centering
-\begin{tabular}{cccccc}
-\hline
-Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
-\hline
-\multirow{4}{*}{Modelo 1}
-& $\beta_{01}$ & 56,8919 & 0,7620 & 74,6654 & $<$0,0001 \\
-& $\beta_{02}$ & 75,8977 & 0,8558 & 88,6906 & $<$0,0001 \\
-& $\beta_{11}$ & 0,6229 & 0,1347 & 4,6256 & $<$0,0001 \\
-& $\beta_{12}$ & 0,9956 & 0,1336 & 7,4505 & $<$0,0001 \\
-\hline
-\multirow{6}{*}{Modelo 2}
-& $\beta_{01}$ & 57,1353 & 0,9269 & 61,6432 & $<$0,0001 \\
-& $\beta_{02}$ & 76,3053 & 1,0556 & 72,2870 & $<$0,0001 \\
-& $\beta_{11}$ & 0,6132 & 0,1368 & 4,4831 & $<$0,0001 \\
-& $\beta_{12}$ & 1,0051 & 0,1349 & 7,4532 & $<$0,0001 \\
-& $\beta_{21}$ & -0,0076 & 0,0164 & -0,4646 & 0,6427 \\
-& $\beta_{22}$ & -0,0099 & 0,0150 & -0,6639 & 0,5075 \\
-\hline
-\multirow{2}{*}{Modelo 3}
-& $\beta_{11}$ & 0,3457 & 0,0049 & 71,1911 & $<$0,0001 \\
-& $\beta_{12}$ & 0,4271 & 0,0050 & 84,6343 & $<$0,0001 \\
-\hline
-\multirow{4}{*}{Modelo 4}
-& $\beta_{11}$ & 0,0690 & 0,1364 & 0,5059 & 0,6135 \\
-& $\beta_{12}$ & -0,1354 & 0,1336 & -1,0136 & 0,3120 \\
-& $\beta_{21}$ & 0,0017 & 0,0008 & 2,0310 & 0,0436 \\
-& $\beta_{22}$& 0,0032 & 0,0007 & 4,2136 & $<$0,0001 \\
+ \centering
+ \begin{tabular}{ccccccc}
+ \hline
+ Modelo & Parâmetro & Estimativa & EP & $IC(95\%)$ & Valor T & Valor p \\
+ \hline
+ \multirow{4}{*}{Modelo 1}
+& $\beta_{01}$ & 56,8919 & 0,7620 & $[55,3892 ; 58,3946]$ & 74,6654 & $<$0.0001 \\
+& $\beta_{02}$ & 75,8977 & 0,8558 & $[74,2100 ; 77,5855]$ & 88,6906 & $<$0.0001 \\
+& $\beta_{11}$ & 0,6229 & 0,1347 & $[0,3573 ; 0,8885]$ & 4,6256 & $<$0.0001 \\
+& $\beta_{12}$ & 0,9956 & 0,1336 & $[0,7321 ; 1,2591]$ & 7,4505 & $<$0.0001 \\
+ \hline
+ \multirow{6}{*}{Modelo 2}
+& $\beta_{01}$ & 57,1353 & 0,9269 & $[55,3072 ; 58,9634]$ & 61,6432 & $<$0.0001 \\
+& $\beta_{02}$ & 76,3053 & 1,0556 & $[74,2233 ; 78,3873]$ & 72,2870 & $<$0.0001 \\
+& $\beta_{11}$ & 0,6132 & 0,1368 & $[0,3434 ; 0,8829]$ & 4,4831 & $<$0.0001 \\
+& $\beta_{12}$ & 1,0051 & 0,1349 & $[0,7392 ; 1,2711]$ & 7,4532 & $<$0.0001 \\
+& $\beta_{21}$ & -0,0076 & 0,0164 & $[-0,0399 ; 0,0247]$ & -0,4646 & 0.6427 \\
+& $\beta_{22}$ & -0,0099 & 0,0150 & $[-0,0395 ; 0,0196]$ & -0,6639 & 0.5075 \\
+ \hline
+ \multirow{2}{*}{Modelo 3}
+& $\beta_{11}$ & 0,3457 & 0,0049 & $[0,3362 ; 0,3553]$ & 71,1911 & $<$0.0001 \\
+& $\beta_{12}$ & 0,4271 & 0,0050 & $[0,4171 ; 0,4371]$ & 84,6343 & $<$0.0001 \\
+ \hline
+ \multirow{4}{*}{Modelo 4}
+& $\beta_{11}$ & 0,0690 & 0,1364 & $[-0,1999 ; 0,3379]$ & 0,5059 & 0.6135 \\
+& $\beta_{12}$ & -0,1354 & 0,1336 & $[-0,3989 ; 0,1280]$ & -1,0136 & 0.312 \\
+& $\beta_{21}$ & 0,0017 & 0,0008 & $[0,0000 ; 0,0033]$ & 2,0310 & 0.0436 \\
+& $\beta_{22}$ & 0,0032 & 0,0007 & $[0,0017 ; 0,0046]$ & 4,2136 & $<$0.0001 \\
 \hline
 \end{tabular}
 \end{table}
 
-```{r ajust_model1, echo=F,eval=FALSE,warning=FALSE,message=FALSE}
+```{r ajust_model1, echo=F, eval=FALSE,warning=FALSE,message=FALSE}
 library(ggplot2)
 gf1=ggplot(data=subset(dadosalt,Sexo=="F"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[1,1],coeff_fit_1[3,1],linetype=1)+theme_light()
 
-
 gm1=ggplot(data=subset(dadosalt,Sexo=="M"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[2,1],coeff_fit_1[4,1],linetype=1)+theme_light()
+grid.arrange(gf1,gm1,ncol=2,nrow=1)
 
+gf2= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_2[1,1],linetype=1)+theme_light()
 
-gf2= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
-
-gm2= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
-grid.arrange(gf,gm,ncol=2,nrow=1)
+gm2= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_2[2,1],linetype=1)+theme_light()
+grid.arrange(gf2,gm2,ncol=2,nrow=1)
 
 gf3= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
 
 gm3= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
+grid.arrange(gf3,gm3,ncol=2,nrow=1)
 
+gf4= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_4[1,1],linetype=1)+theme_light()
 
-gf4= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
-
-gm4= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
-grid.arrange(gf,gm,ncol=2,nrow=1)
+gm4= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_4[2,1],linetype=1)+theme_light()
+grid.arrange(gf4,gm4,ncol=2,nrow=1)
 
 
 grid.arrange(gf1,gm1,gf2,gm2,gf3,gm3,gf4,gm4,ncol=2,nrow=4)
