@@ -74,8 +74,8 @@ library(ggplot2)
 
 # pacotes para manipulação de dados
 library(reshape2)
-library(dplyr)
 library(plyr)
+library(dplyr)
 library(gridExtra)
 
 #pacote que possui o conjunto de dados para o primeiro exercício
@@ -100,6 +100,7 @@ tbls <- captioner(prefix="Tabela")
 ```
 
 ```{r gráficos de resíduos,cache = TRUE,echo=FALSE}
+
 library(ggplot2)
 library(gridExtra)
 # Programa extraído do site: https://www.ime.usp.br/~giapaula/textoregressao.htm
@@ -107,12 +108,10 @@ library(gridExtra)
 # Adaptado por Caio L. N. Azevedo
 # source("C:\\Users\\cnaber\\Trabalho\\windows\\Unicamp\\Disciplinas\\2_semestre_2016\\ME 613\\Programas\\diag2_norm.r")
 
-
+library(ggplot2)
 diag2norm<-function(fit.model){
 # fit.model: objeto com o ajuste do modelo normal linear homocedástico 
 # obtido através da função "lm"
-
-par(mfrow=c(2,2))
 X <- model.matrix(fit.model)
 n <- nrow(X)
 p <- ncol(X)
@@ -125,86 +124,72 @@ ts <- r/(s*sqrt(1-h))
 di <- (1/p)*(h/(1-h))*(ts^2)
 si <- lm.influence(fit.model)$sigma
 tsi <- r/(si*sqrt(1-h))
+tam <- 1:length(tsi)
 a <- max(tsi)
 b <- min(tsi)
-par(mfrow=c(2,2))
-#
-plot(tsi,main = "A",xlab="Índice", ylab="Resíduo Studentizado",
-ylim=c(b-1,a+1), pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
-abline(2,0,lty=2)
-abline(-2,0,lty=2)
-abline(0,0,lty=2)
-#identify(tsi, n=1)
-#title(sub="(c)")
-#
-plot(fitted(fit.model),main = "B",tsi,xlab="Valores Ajustados", 
-ylab="Resíduo Studentizado", ylim=c(b-1,a+1), pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
-#
-abline(2,0,lty=2)
-abline(-2,0,lty=2)
-abline(0,0,lty=2)
-#boxplot(tsi,ylab="Resíduo Studentizado",cex=1.1,cex.axis=1.1,cex.lab=1.1)
-hist(tsi,xlab="Resíduo Studentizado",ylab="densidade",probability=TRUE,main="C",cex=1.1,cex.axis=1.1,cex.lab=1.1)
-#title(sub="(d)")
-#identify(fitted(fit.model),tsi, n=1)
-#
-boxplot(tsi,main = "D",ylab="Resíduo Studentizado",cex=1.1,cex.axis=1.1,cex.lab=1.1)
 
+g1 = ggplot(data=data.frame(tam,tsi),aes(tam,tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Índice")+labs(title="A")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
+
+g2 =  ggplot(data=data.frame(fitted(fit.model),tsi),aes(fitted(fit.model),tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Valores Ajustados")+labs(title="B")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
+
+#Histograma
+g3 = ggplot(data=data.frame(tsi),aes(tsi,col=I("black"),fill=I("white")))+geom_histogram(binwidth = 1,aes(y=..density..))+labs(title="C",x="Resíduo Studentizado",y="Densidade")+theme_light()
+
+#Boxplot
+g4 = ggplot(data=data.frame(fac = factor(1),tsi),aes(fac,tsi,col=I("black"),fill=I("white")))+ geom_boxplot(outlier.size = 1.5, outlier.colour = "red",width=0.4)+labs(title="D")+scale_x_discrete(name="")+scale_y_continuous(name = "Residuo Studentizado")+theme(axis.text.x = element_blank())+theme_light()
+
+#funcao que une todos os gráficos
+grid.arrange(g1,g2,g3,g4,ncol=2,nrow=2)
 #---------------------------------------------------------------#
 
 }
 
 # Programa extraído do site: https://www.ime.usp.br/~giapaula/textoregressao.htm
 # Créditos: Prof. Dr. Gilberto Alvarenga Paula
-# Adaptado por Caio L. N. Azevedo
+# Adaptado por Caio L. N. Azevedo e Henrique Capatto
 
-envelnorm<-function(fit.model){
-# fit.model: objeto com o ajuste do modelo normal linear homocedástico 
-# obtido através da função "lm"
+envelnorm<-function(fit.model){  
+# argumento: modelo de regressão linear homocedástico ajustado
+# Eu adaptei uma função que achei na net com o que o Caio fez nos grafs de envelope. Agradeçam a um desconhecido.  
 
-#par(mfrow=c(1,1))
-X <- model.matrix(fit.model)
-n <- nrow(X)
-p <- ncol(X)
-H <- X%*%solve(t(X)%*%X)%*%t(X)
-h <- diag(H)
-si <- lm.influence(fit.model)$sigma
-r <- resid(fit.model)
-tsi <- r/(si*sqrt(1-h))
-#
-ident <- diag(n)
-epsilon <- matrix(0,n,100)
-e <- matrix(0,n,100)
-e1 <- numeric(n)
-e2 <- numeric(n)
-#
-for(i in 1:100){
-     epsilon[,i] <- rnorm(n,0,1)
-     e[,i] <- (ident - H)%*%epsilon[,i]
-     u <- diag(ident - H)
-     e[,i] <- e[,i]/sqrt(u)
-     e[,i] <- sort(e[,i]) }
-#
-for(i in 1:n){
-     eo <- sort(e[i,])
-     e1[i] <- (eo[2]+eo[3])/2
-     e2[i] <- (eo[97]+eo[98])/2 }
-#
-med <- apply(e,1,mean)
-faixa <- range(tsi,e1,e2)
-#
-#par(pty="s")
-qqnorm(tsi,xlab="Percentil da N(0,1)",
-ylab="Residuo Studentizado", ylim=faixa, pch=16, main="",cex=1.1,cex.axis=1.1,cex.lab=1.1)
-
-par(new=T)
-qqnorm(e1,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=1, main="")
-par(new=T)
-qqnorm(e2,axes=F,xlab="",ylab="", type="l",ylim=faixa,lty=1, main="")
-par(new=T)
-qqnorm(med,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=2, main="")
-#------------------------------------------------------------#
-
+  
+  
+    X <- model.matrix(fit.model)
+    n <- nrow(X)
+    p <- ncol(X)
+    H <- X%*%solve(t(X)%*%X)%*%t(X)
+    h <- diag(H)
+    si <- lm.influence(fit.model)$sigma
+    r <- resid(fit.model)
+    tsi <- r/(si*sqrt(1-h))
+    #
+    ident <- diag(n)
+    epsilon <- matrix(0,n,100)
+    e <- matrix(0,n,100)
+    e1 <- numeric(n)
+    e2 <- numeric(n)
+    #
+    for(i in 1:100){
+        epsilon[,i] <- rnorm(n,0,1)
+        e[,i] <- (ident - H)%*%epsilon[,i]
+        u <- diag(ident - H)
+        e[,i] <- e[,i]/sqrt(u)
+        e[,i] <- sort(e[,i]) }
+    #
+    for(i in 1:n){
+        eo <- sort(e[i,])
+        e1[i] <- (eo[2]+eo[3])/2
+        e2[i] <- (eo[97]+eo[98])/2 }
+  
+  
+    y <- quantile(tsi[!is.na(tsi)], c(0.25, 0.75))
+    x <- qnorm(c(0.25, 0.75))
+    slope <- diff(y)/diff(x)
+    int <- y[1L] - slope * x[1L]
+  
+    d <- data.frame(resids = tsi)
+  
+    ggplot(d, aes(sample = resids))+stat_qq()+stat_qq(aes(sample=e1),geom="line")+stat_qq(aes(sample=e2),geom="line")+ geom_abline(slope = slope, intercept = int,linetype = 3)+labs(x="Percentil da N(0,1)",y="Residuo Studentizado",title="E")+theme_light()
 }
 
 
@@ -295,8 +280,8 @@ print(m.M)
 
 # legenda para a primeira tabela(estats descr) do primeiro exercício
 legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
-legenda_table3 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
 legenda_table2 = tbls(name="table_aic_bic",caption = "Comparação dos modelos")
+legenda_table3 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
 #legendas para os gráficos
 
 #legenda para o primeiro Boxplot
@@ -312,6 +297,7 @@ legenda_graf8 = figs(name="graf8_analiseresidual",caption = "Análise residual p
 legenda_graf9 = figs(name="graf9_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 3")
 legenda_graf10 = figs(name="graf10_analiseresidual",caption = "Análise residual para o modelo 4")
 legenda_graf11 = figs(name="graf11_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 4")
+legenda_graf12 = figs(name="graf12_Ajuste",caption = "Gráfico de pontos com a reta ajustada pelo modelo 1")
 
 
 ```
@@ -328,7 +314,7 @@ legenda_graf11 = figs(name="graf11_envelope",caption = "Gráfico de envelope par
 
 \vspace{1.5cm}
 
-```{r manipulacao_dados_exercicio_1, cache = TRUE ,echo = TRUE}
+```{r manipulacao_dados_exercicio_1, cache = TRUE ,echo = FALSE}
 #retirada da observacao 12 e pegando só as variaveis sexo, peso e altura
 dados_1 = Davis[-12,1:3]
 names(dados_1)=c("Sexo","Peso","Altura")
@@ -342,7 +328,12 @@ Sexo = c(rep("F",nrow(Altf)),rep("M",nrow(Altm)))
 Peso = c(Altf$Peso,Altm$Peso)
 Altura = c(Altf$Altura,Altm$Altura)
 
-Alturamf = (Altura-mean(Altura))
+
+
+Alturamf = c(Altf$Altura-mean(Altf$Altura),Altm$Altura-mean(Altm$Altura))
+
+dadosalt = data.frame(Sexo,Peso,Alturamf)
+
 ```
 
 \begin{enumerate}
@@ -366,6 +357,7 @@ library(printr)
 df <- melt(dados_1,id.vars = 1)
 resumo <- ddply(df, c("Sexo","variable"), function(x) summary(x$value))
 dp = ddply(df, c("Sexo","variable"), function(x) sd(x$value))
+options(OutDec= ",")
 estat_descr = data.frame(resumo,dp[,3])
 
 names(estat_descr)=c("Sexo","Variável","Minímo","1ºQuartil","Mediana","Média","3ºQuartil","Máximo","Erro Padrão")
@@ -380,26 +372,24 @@ A figura 1 mostra um boxplot dos valores de peso por gênero e um boxplot dos va
 #gráficos
 # boxplot sexo x peso
 graf1 = ggplot(dados_1, aes(Sexo,Peso,fill=Sexo))
-graf1 = graf1+geom_boxplot()+labs(title = "Boxplot: Sexo x Peso" , x = "Sexo", y="Peso")
+graf1 = graf1+geom_boxplot()+labs(title = "Boxplot: Sexo x Peso" , x = "Sexo", y="Peso")+theme_light()+ scale_fill_brewer(palette ="Blues")+theme(plot.title = element_text(hjust = 0.5))+theme(legend.position = "none")
 
 # boxplot sexo x altura
 graf2 = ggplot(dados_1, aes(Sexo,Altura,fill=Sexo))
-graf2 = graf2 + geom_boxplot()+labs(title = "Boxplot: Sexo x Altura" , x = "Sexo", y="Altura")
+graf2 = graf2 + geom_boxplot()+labs(title = "Boxplot: Sexo x Altura" , x = "Sexo", y="Altura")+theme_light()+ scale_fill_brewer(palette ="Blues")+theme(plot.title = element_text(hjust = 0.5))+theme(legend.position = "none")
 
 grid.arrange(graf1, graf2, nrow=1, ncol=2)
 ```
 \begin{center}
 `r legenda_graf1`
 \end{center}
-
 \vspace{0.5cm}
 Na figura 2 abaixo, temos um gráfico de dispersão do peso em relação a altura dos indivíduos, desconsiderando o gênero. Podemos perceber que há uma relação positiva entre a váriavel resposta(peso) e a variável explicativa(altura), isto é, quanto maior a altura, maior o peso do indivíduo. Tal relação pode ser razoavelmente representada por uma reta ou uma curva quadrática.
 
 \vspace{0.6cm}
-```{r disp_11, cache=TRUE,echo = TRUE,fig.align='center',fig.width=5.5,fig.height=3.4,warning=FALSE}
+```{r disp_11, cache=TRUE,echo = FALSE,fig.align='center',fig.width=5.5,fig.height=3.4,warning=FALSE}
 # Dispersão entre Altura e Peso (Desconsiderando o sexo)
-graf3 = ggplot(dados_1, aes(Altura,Peso))
-graf3+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))
+ggplot(dados_1, aes(Altura,Peso))+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))+theme_light()
 ```
 \begin{center}
 `r legenda_graf2`
@@ -410,14 +400,14 @@ Podemos ver que para ambos os sexos,há uma relação positiva, o peso cresce a 
 Tanto para o sexo feminino quanto o masculino podemos ainda razoavelmente representar esta relação entre peso e altura por uma reta ou uma curva quadrática.
 
 \vspace{0.5cm}
-```{r disp_12, cache=TRUE,echo = TRUE,fig.width=5.5,fig.height=3.5,fig.align='center'}
+```{r disp_12, cache=TRUE,echo = FALSE,fig.width=5.5,fig.height=3.5,fig.align='center'}
 # Dispersão entre Altura e Peso (feminino)
 graf4= ggplot(Altf, aes(Altura,Peso))
-graf4=graf4+geom_point()+labs(title = "Sexo Feminino" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))
+graf4=graf4+geom_point()+labs(title = "Sexo Feminino" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))+theme_light()
 
 # Dispersão entre Altura e Peso (masculino)
 graf5 = ggplot(Altm, aes(Altura,Peso))
-graf5 = graf5+geom_point()+labs(title = "Sexo Masculino" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))
+graf5 = graf5+geom_point()+labs(title = "Sexo Masculino" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))+theme_light()
 grid.arrange(graf4, graf5, nrow=1, ncol=2)
 ```
 \begin{center}
@@ -441,7 +431,7 @@ Dado a natureza dos dados, não faz sentido observarmos algum valor diferente de
 
 Modelo 1
 
-$$Y_{ij} = \beta_{0i}+\beta_{1i} (x_{ij}-\bar{x})+\varepsilon_{ij} \left\{\begin{matrix}
+$$Y_{ij} = \beta_{0i}+\beta_{1i} (x_{ij}-\bar{x_{i}})+\varepsilon_{ij} \left\{\begin{matrix}
 i=1,2\\ 
 j=1,\dots, 199\\ 
 \end{matrix}\right.$$
@@ -452,7 +442,7 @@ Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$.
 
 \item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
 \item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
-\item $\beta_{0i}$: Peso esperado para o indivíduo do i-ésimo sexo, quando sua altura é igual ao valor da média.
+\item $\beta_{0i}$: Peso esperado para o indivíduo do i-ésimo sexo, quando sua altura é igual ao valor da média de cada grupo.
 
 \item $\beta_{1i}$: Incremento (positivo ou negativo) no peso esperado do j-ésimo indivíduo do i-ésimo sexo, para o aumento em uma unidade na altura.
 
@@ -460,7 +450,7 @@ Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$.
 
 ```{r,cache = TRUE,echo=FALSE}
 #análise para o modelo 1
-fit_1 = lm(Peso~Alturamf+Sexo,data = dados_1)
+fit_1 = lm(Peso~-1+Sexo+(Alturamf:Sexo))
 resumo_fit_1 = summary(fit_1)
 coeff_fit_1 = resumo_fit_1$coefficients
 coeff_fit_1 = data.frame(round(as.double(coeff_fit_1[,1]),4),round(as.double(coeff_fit_1[,2]),4),round(as.double(coeff_fit_1[,3]),4),ifelse(as.double(coeff_fit_1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
@@ -548,7 +538,7 @@ Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 \end{itemize}
 ```{r,cache = TRUE,echo=FALSE}
 #analise para o modelo 3
-fit_3 = lm(Peso~-1+(Altura:Sexo))
+fit_3 = lm(Peso~-1+(Altura:Sexo),data=dados_1)
 resumo_fit_3 = summary(fit_3)
 coeff_fit_3 = resumo_fit_3$coefficients
 coeff_fit_3 = data.frame(round(as.double(coeff_fit_3[,1]),4),round(as.double(coeff_fit_3[,2]),4),round(as.double(coeff_fit_3[,3]),4),ifelse(as.double(coeff_fit_3[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_3[,4]),4)))
@@ -585,16 +575,16 @@ Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 \begin{itemize}
 \item $Y_{ij}$: Peso do j-ésimo indíviduo do i-ésimo sexo.
 \item $x_{ij}$: Altura do j-ésimo indivíduo do i-ésimo sexo.
-\item $B_{1i}$: Incremento(positivo ou negativo) no peso quando se aumenta uma unidade de $x_{ij}$.
-$\frac{-\beta_{1i}}{2\beta_{2i}}$: Valor da altura para o qual o peso esperado é máximo ou mínimo.
+\item $\beta_{1i}$: Incremento(positivo ou negativo) no peso quando se aumenta em uma unidade o valor da altura.
+\item $\frac{-\beta_{1i}}{2\beta_{2i}}$: Valor da altura para o qual o peso esperado é máximo ou mínimo.
 
 \end{itemize}
 
 
 ```{r,cache = TRUE,echo=FALSE}
 #analises para o modelo 4
-alt2 = Altura^2
-fit_4 = lm(Peso~-1+(Altura:Sexo)+(alt2:Sexo))
+alt2 = dados_1$Altura^2
+fit_4 = lm(Peso~-1+(Altura:Sexo)+(alt2:Sexo),data=dados_1)
 resumo_fit_4 = summary(fit_4)
 coeff_fit_4 = resumo_fit_4$coefficients
 coeff_fit_4 = data.frame(round(as.double(coeff_fit_4[,1]),4),round(as.double(coeff_fit_4[,2]),4),round(as.double(coeff_fit_4[,3]),4),ifelse(as.double(coeff_fit_4[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_4[,4]),4)))
@@ -613,6 +603,9 @@ rownames(medidas_modelo_4)=c("AIC","BIC","Log-Verossimilhança")
 ```
 
 \vspace{1cm}
+Os quatro modelos foram ajustados usando a metodologia de mínimos quadrados
+ordinários, mais detalhes na referência 1(Azevedo (2016)) e análises residuais foram realizadas,conforme pode ser visto na referência 4(Paula (2013)), veja as Figuras de 4 a 11.
+Podemos ver que o modelo 4 sugerido, apresentou um melhor ajuste, em comparação com os outros três, embora tanto este quanto os outros ajustes não sejam satisfatórios. 
 
 Para o modelo 1, na figura 4, podemos notar pelo gráfico A que uma observação se destaca das demais. Já pelo gráfico B(resíduos x valores ajustados), nota-se indícios de heterocedasticidade uma vez que, a variabilidade dos resíduos parece aumentar com o aumento do valores ajustados. 
 Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que possívelmente pode indicar a não normalidade dos dados.Além disso, o gráfico de envelopes, na figura 5, acusa um mal ajuste, devido ao comportamente levemente sistemático. Dadas as observações feitas,concluimos que o modelo não teve um ajuste adequado.
@@ -624,22 +617,25 @@ O gráfico de envelopes, na figura 9, apresenta uma tendência e novamente,vári
 
 Para o modelo 4, pela figura 10 podemos ver um ponto discrepante tanto no gráfico A como no gráfico B. No gráfico A, não se observa nenhuma tendência que indique dependência dos dados. No gráfico B, notamos um pequeno agrupamento dos dados e logo depois uma pequena dispersão dos mesmos, tal tendência, sugere uma possível heterocedasticidade dos dados.Ambos os gráficos C e D, mostram uma leva assimetria positiva, onde no gráfico C e no gráfico D, temos a presença de outliers, tanto abaixo como acima da média.
 O gráfico de envelopes para o modelo 4, na figura 11, apresenta uma tendência e vários pontos fora dos envelopes, sugerindo assim, uma falta de normalidade.
-Concluímos, pois, que nenhum dos quatro modelos se ajustou bem. Contudo, devido ao fato de não podermos escolher modelos para além da classe dos modelos lineares normais homocedásticos, iremos continuar comparando os modelos propostos acima.
 
-As estatísticas de comparação dos quatro modelos pode ser visto na tabela 2. Seguindo o critério de escolha usando as estatísticas AIC e BIC, temos que o modelo 4 é o modelo mais bem ajustado.
+Concluímos, então, que nenhum dos quatro modelos se ajustou bem. Contudo, devido ao fato de não podermos escolher modelos para além da classe dos modelos lineares normais homocedásticos, iremos continuar comparando os modelos propostos acima.
 
-Na Tabela 3 apresentamos os principais
-resultados relativos à estimação pontual e intervalar dos dois modelos. Podemos ver que para o modelo 1, todos os parâmetros sao significativos para qualquer nível de significância usual(0,01 à 0,10), enquanto que para o modelo 2, os parâmetros $\beta_{01}$, $\beta_{02}$ e $\beta_{12}$ são significativos e os parâmetros $\beta_{21}$ e $\beta_{22}$ não são,
-para qualquer nível de significância usual, entretanto $\beta_{11}$ é significativo apenas à um nivel de até 0,05.
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+As estatísticas de comparação dos quatro modelos podem serem vistas na tabela 2. Seguindo o critério de escolha usando as estatísticas AIC e BIC, temos novamente que o modelo 4 é o modelo mais bem ajustado. Na tabela 2 também podemos ver os valores para $R^2$ e $R^2$ ajustado para cada modelo, para todos os modelos os valores são relativamente altos, indicando que os respectivos modelos explicam quase que 100% da variabilidade do dados.Sabemos porém que, a simples visualização dessas quantidades, por si só, não é
+suficiente para se medir a adequabilidade do modelo.
+
+Na Tabela 3 apresentamos os principais resultados relativos à estimação pontual e intervalar dos quatros modelos. Podemos ver que para os modelos 1 e 3, todos os parâmetros sao significativos para qualquer nível de significância usual(0,01 à 0,10).Já para o modelo 2, os parâmetros $\beta_{01}$, $\beta_{02}$ e $\beta_{12}$ são significativos para os mesmos níveis de significancia citados acima, enquanto que o parâmetro $\beta_{11}$ é significativo apenas à níveis até 0,05 e os parâmetros $\beta_{21}$ e $\beta_{22}$ não são relevantes.
+E para o modelo 4, apenas o parâmetro $\beta_{22}$ é significante à qualquer nível de significancia usual, enquanto que $\beta_{21}$ é significante para níveis até 0,05, já os demais parâmetros não são significativos.
+
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
 #Análise de resíduos para o modelo 1
+library(ggplot2)
 diag2norm(fit_1)
 ```
 \begin{center}
 `r legenda_graf4`
 \end{center}
 
-```{r,echo =FALSE,fig.width=6.5,fig.height=4,fig.align='center'}
+```{r,echo =FALSE,fig.width=6.5,fig.height=4,fig.align='center',eval=FALSE}
 #gráfico de envelopes do modelo 1
 envelnorm(fit_1)
 ```
@@ -649,7 +645,7 @@ envelnorm(fit_1)
 \end{center}
 
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
 ##Análise de resíduos para o modelo 2
 diag2norm(fit_2)
 ```
@@ -658,7 +654,7 @@ diag2norm(fit_2)
 `r legenda_graf6`
 \end{center}
 
-```{r,echo = TRUE,fig.width=7,fig.height=4,fig.align='center'}
+```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',eval=FALSE}
 #gráfico de envelopes do modelo 2
 envelnorm(fit_2)
 ```
@@ -667,7 +663,7 @@ envelnorm(fit_2)
 `r legenda_graf7`
 \end{center}
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
 #Análise de resíduos para o modelo 3
 diag2norm(fit_3)
 ```
@@ -676,7 +672,7 @@ diag2norm(fit_3)
 `r legenda_graf8`
 \end{center}
 
-```{r,echo = TRUE,fig.width=7,fig.height=4,fig.align='center'}
+```{r,echo = TRUE,fig.width=7,fig.height=4,fig.align='center',eval=FALSE}
 #gráfico de envelopes do modelo 3
 envelnorm(fit_3)
 ```
@@ -685,7 +681,7 @@ envelnorm(fit_3)
 `r legenda_graf9`
 \end{center}
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center'}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
 ##Análise de resíduos para o modelo 4
 diag2norm(fit_4)
 ```
@@ -694,7 +690,7 @@ diag2norm(fit_4)
 `r legenda_graf10`
 \end{center}
 
-```{r,echo = TRUE,fig.width=7,fig.height=4, fig.align='center'}
+```{r,echo = TRUE,fig.width=7,fig.height=4, fig.align='center',eval=FALSE}
 #gráfico de envelopes do modelo 4
 envelnorm(fit_4)
 ```
@@ -705,8 +701,7 @@ envelnorm(fit_4)
 
 ```{r, echo=FALSE,results="hide"}
 tabela_medidas_modelos=cbind(medidas_modelo_1,medidas_modelo_2,medidas_modelo_3,medidas_modelo_4)
-#library(xtable)
-#print(xtable(tabela_medidas_modelos))
+
 rmodel1=round(summary(fit_1)$r.squared,4)
 rmodel2=round(summary(fit_2)$r.squared,4)
 rmodel3=round(summary(fit_3)$r.squared,4)
@@ -717,6 +712,8 @@ rqmodel2=round(summary(fit_2)$adj.r.squared,4)
 rqmodel3=round(summary(fit_3)$adj.r.squared,4)
 rqmodel4=round(summary(fit_4)$adj.r.squared,4)
 
+#library(xtable)
+#print(xtable(tabela_medidas_modelos))
 ```
 
 \vspace{1cm}
@@ -724,15 +721,32 @@ rqmodel4=round(summary(fit_4)$adj.r.squared,4)
 `r legenda_table2`
 \end{center}
 
+```{r, echo=FALSE}
+options(OutDec= ",")
+AIC1=round(AIC(fit_1),4)
+AIC2=round(AIC(fit_2),4)
+AIC3=round(AIC(fit_3),4)
+AIC4=round(AIC(fit_4),4)
+BIC1=round(BIC(fit_1),4)
+BIC2=round(BIC(fit_2),4)
+BIC3=round(BIC(fit_3),4)
+BIC4=round(BIC(fit_4),4)
+logLik1=round(logLik(fit_1),4)
+logLik2=round(logLik(fit_2),4)
+logLik3=round(logLik(fit_3),4)
+logLik4=round(logLik(fit_4),4)
+
+```
+
  \begin{table}[ht]
 \centering
 \begin{tabular}{ccccc}
 \hline
 & Modelo 1 & Modelo 2 & Modelo 3 & Modelo 4 \\
 \hline
-AIC & 1421.57 & 1403,02 & 1417,30 & 1400,14 \\
-BIC & 1431,45 & 1426,07 & 1427,18 & 1416,60 \\
-Log-Verossimilhança & -707,79 & -694,51 & -705,65 & -695,07 \\
+AIC & `r AIC1` & `r AIC2`2 & `r AIC3` & `r AIC4` \\
+BIC & `r BIC1`, & `r BIC2` & `r BIC3` & `r BIC4` \\
+Log-Verossimilhança & `r logLik1` & `r logLik2` & `r logLik3` & `r logLik4` \\
 $R^2$ & `r rmodel1` & `r rmodel2` & `r rmodel3` & `r rmodel4`\\
 $R^2$ Ajustado & `r rqmodel1` & `r rqmodel2` & `r rqmodel3` & `r rqmodel4` \\
 \hline
@@ -748,7 +762,6 @@ tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
 ```
 
 
-##Os valores desta tabela estão erradados
 \vspace{1cm}
 \begin{center}
 `r legenda_table3`
@@ -760,31 +773,60 @@ tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
 \hline
 Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
 \hline
-\multirow{2}{*}{Modelo 1}
- & $\beta_{01}$ & 65,30 & 0,60 & 108,07 & $<$0,0001 \\
- & $\beta_{02}$ & 1,15 & 0,07 & 16,98 & $<$0,0001 \\
+\multirow{4}{*}{Modelo 1}
+& $\beta_{01}$ & 56,8919 & 0,7620 & 74,6654 & $<$0,0001 \\
+& $\beta_{02}$ & 75,8977 & 0,8558 & 88,6906 & $<$0,0001 \\
+& $\beta_{11}$ & 0,6229 & 0,1347 & 4,6256 & $<$0,0001 \\
+& $\beta_{12}$ & 0,9956 & 0,1336 & 7,4505 & $<$0,0001 \\
 \hline
 \multirow{6}{*}{Modelo 2}
- & $\beta_{01}$ & 60,48 & 1,12 & 54,20 & $<$0,0001 \\
- & $\beta_{02}$ & 68,30 & 1,35 & 50,50 & $<$0,0001 \\
- & $\beta_{11}$ & 0,52 & 0,25 & 2,07 & 0,0397 \\
- & $\beta_{12}$ & 1,15 & 0,27 & 4,24 & $<$0,0001 \\
- & $\beta_{21}$ & -0,01 & 0,02 & -0,46 & 0,6427 \\
- & $\beta_{22}$ & -0,01 & 0,01 & -0,66 & 0,5075 \\
+& $\beta_{01}$ & 57,1353 & 0,9269 & 61,6432 & $<$0,0001 \\
+& $\beta_{02}$ & 76,3053 & 1,0556 & 72,2870 & $<$0,0001 \\
+& $\beta_{11}$ & 0,6132 & 0,1368 & 4,4831 & $<$0,0001 \\
+& $\beta_{12}$ & 1,0051 & 0,1349 & 7,4532 & $<$0,0001 \\
+& $\beta_{21}$ & -0,0076 & 0,0164 & -0,4646 & 0,6427 \\
+& $\beta_{22}$ & -0,0099 & 0,0150 & -0,6639 & 0,5075 \\
 \hline
 \multirow{2}{*}{Modelo 3}
- & $\beta_{11}$ & 65,30 & 0,60 & 108,07 & 1 \\
- & $\beta_{12}$ & 1,15 & 0,07 & 16,98 & 1 \\
+& $\beta_{11}$ & 0,3457 & 0,0049 & 71,1911 & $<$0,0001 \\
+& $\beta_{12}$ & 0,4271 & 0,0050 & 84,6343 & $<$0,0001 \\
 \hline
 \multirow{4}{*}{Modelo 4}
- & $\beta_{11}$ & 0,07 & 0,14 & 0,51 & 1 \\
- & $\beta_{12}$ & -0,14 & 0,13 & -1,01 & 1 \\
- & $\beta_{21}$ & 0,00 & 0,00 & 2,03 & 1 \\
- & $\beta_{22}$ & 0,00 & 0,00 & 4,21 & $<$0,0001 \\
+& $\beta_{11}$ & 0,0690 & 0,1364 & 0,5059 & 0,6135 \\
+& $\beta_{12}$ & -0,1354 & 0,1336 & -1,0136 & 0,3120 \\
+& $\beta_{21}$ & 0,0017 & 0,0008 & 2,0310 & 0,0436 \\
+& $\beta_{22}$& 0,0032 & 0,0007 & 4,2136 & $<$0,0001 \\
 \hline
 \end{tabular}
 \end{table}
 
+```{r ajust_model1, echo=F,eval=FALSE}
+library(ggplot2)
+gf1=ggplot(data=subset(dadosalt,Sexo=="F"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[1,1],coeff_fit_1[3,1],linetype=1)+theme_light()
+
+
+gm1=ggplot(data=subset(dadosalt,Sexo=="M"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[2,1],coeff_fit_1[4,1],linetype=1)+theme_light()
+
+
+gf2= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
+
+gm2= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
+grid.arrange(gf,gm,ncol=2,nrow=1)
+
+gf3= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
+
+gm3= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
+
+
+gf4= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
+
+gm4= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
+grid.arrange(gf,gm,ncol=2,nrow=1)
+
+
+grid.arrange(gf1,gm1,gf2,gm2,gf3,gm3,gf4,gm4,ncol=2,nrow=4)
+
+```
 
 \newpage
 \vspace{0.5cm}
@@ -794,12 +836,9 @@ Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
 \end{enumerate}
 \vspace{0.3cm}
 
-escrever conclusões<p>
-escrever conclusões<p>
-escrever conclusões<p>
-escrever conclusões
-escrever conclusões
-escrever conclusões
+Nenhum  dos quatro modelos propostos teve bom ajuste aos conjunto de dados portanto optou-se por aquele cujo ajustamento fora o menos pior dentre eles. Os modelos apontaram uma tendência crescentes nos dados, vistas na análise descritiva para ambos os sexos. Conclui-se então que o melhor modelo, segundo os critérios de seleção e comparação de modelos AIC, BIC e Log-Verossimilhança, é o modelo 4 pois teve o menor valor entre os valores entre os AIC's e BIC's e o segundo maior das Log-Verossimilhanças comparadas, mesmo que houvesse pouca diferença em relação ao modelo quatro mas como o  escolhido possui menos parâmetros e portanto, é o mais reduzido.
+Vê-se que o aumento em uma unidade de altura acarreta em um aumento no peso do indivíduo.
+
 \vspace{0.5cm}
 
 \newpage
@@ -809,6 +848,7 @@ escrever conclusões
 \end{enumerate}
 
 \vspace{0.3cm}
+
 \begin{itemize}
   \item Azevedo, C. L. N (2016). Notas de aula sobre planejamento e análise de experimentos,\url{http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_20
 16.htm}
@@ -821,12 +861,6 @@ escrever conclusões
   
 \end{itemize}
 
-\vspace{0.5cm}
 
-\begin{enumerate}
-\setcounter{enumi}{5}
-\item Apêndice
-\end{enumerate}
-\vspace{0.3cm}
 
 
