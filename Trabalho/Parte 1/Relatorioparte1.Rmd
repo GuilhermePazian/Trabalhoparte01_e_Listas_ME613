@@ -67,7 +67,7 @@ Murilo Salgado Razoli  RA:150987 \break
 \onehalfspacing
 \newpage
 
-```{r pacotes,cache = TRUE,echo=FALSE, error = FALSE}
+```{r pacotes,cache = TRUE,echo=FALSE, error = FALSE,warning=FALSE,message=FALSE}
 # pacote utiliado para gráficos
 library(ggplot2)
 # pacote que deixa os gráficos do ggplot lado a lado
@@ -99,10 +99,10 @@ tbls <- captioner(prefix="Tabela")
 
 ```
 
-```{r gráficos de resíduos,cache = TRUE,echo=FALSE}
-
+```{r gráficos de resíduos,cache = TRUE,echo=FALSE,warning=FALSE,message=FALSE}
 library(ggplot2)
 library(gridExtra)
+
 # Programa extraído do site: https://www.ime.usp.br/~giapaula/textoregressao.htm
 # Créditos: Prof. Dr. Gilberto Alvarenga Paula
 # Adaptado por Caio L. N. Azevedo
@@ -230,7 +230,7 @@ plot(di,xlab="Índice", ylab="Distância de Cook", pch=16,cex=1.1,cex.axis=1.1,c
 
 ```
 
-```{r Teste Cbeta, cache=TRUE, echo=FALSE}
+```{r Teste Cbeta, cache=TRUE, echo=FALSE,warning=FALSE,message=FALSE}
 # fit.model: saída do modelo ajustado
 # m.C: matriz C relativa às hipóteses de interesse
 
@@ -273,9 +273,25 @@ print(m.M)
 
 }
 
+
+
+#FUÇÃO para fazer os ICs
+#fit é o modelo ajustado
+ICt_FIT <- function(fit) {
+n <- length(fit$residuals)
+p <- length(fit$coefficients)
+est <- summary(fit)$coefficients[,1]  
+ep <- summary(fit)$coefficients[,2]
+LI_IC_.95 <- round(est-qt(0.975,n-p)*ep,4)
+LS_IC_.95 <- round(est+qt(0.975,n-p)*ep,4)
+IC <- data.frame(LI_IC_.95,LS_IC_.95)
+names(IC) <- c("LI IC (.95)","LS IC (.95)")
+return(IC)
+}
+
 ```
 
-```{r legendas, echo=FALSE, cache=TRUE}
+```{r legendas, echo=FALSE, cache=TRUE,warning=FALSE,message=FALSE}
 #legenda para as tabelas
 
 # legenda para a primeira tabela(estats descr) do primeiro exercício
@@ -314,7 +330,7 @@ legenda_graf12 = figs(name="graf12_Ajuste",caption = "Gráfico de pontos com a r
 
 \vspace{1.5cm}
 
-```{r manipulacao_dados_exercicio_1, cache = TRUE ,echo = FALSE}
+```{r manipulacao_dados_exercicio_1, cache = TRUE ,echo = FALSE,warning=FALSE,message=FALSE}
 #retirada da observacao 12 e pegando só as variaveis sexo, peso e altura
 dados_1 = Davis[-12,1:3]
 names(dados_1)=c("Sexo","Peso","Altura")
@@ -350,7 +366,7 @@ Observando a tabela 1, podemos ver que em média, o peso e a altura dos homens s
 \end{center}
 
 
-```{r,cache = TRUE,echo=FALSE}
+```{r,cache = TRUE,echo=FALSE,warning=FALSE,message=FALSE}
 #estatísticas
 library(printr)
 
@@ -358,7 +374,7 @@ df <- melt(dados_1,id.vars = 1)
 resumo <- ddply(df, c("Sexo","variable"), function(x) summary(x$value))
 dp = ddply(df, c("Sexo","variable"), function(x) sd(x$value))
 options(OutDec= ",")
-estat_descr = data.frame(resumo,dp[,3])
+estat_descr = data.frame(resumo,round(dp[,3],4))
 
 names(estat_descr)=c("Sexo","Variável","Minímo","1ºQuartil","Mediana","Média","3ºQuartil","Máximo","Erro Padrão")
 
@@ -368,7 +384,7 @@ estat_descr
 \vspace{0.5cm}
 A figura 1 mostra um boxplot dos valores de peso por gênero e um boxplot dos valores de altura também por gênero. Observando-os podemos confirmar os padrões já identificados pelas estatísticas descritivas.
 
-```{r graf_box_1,cache = TRUE,echo=FALSE, fig.height=3, fig.width=6,fig.align='center',warning=FALSE}
+```{r graf_box_1,cache = TRUE,echo=FALSE, fig.height=3, fig.width=6,fig.align='center',warning=FALSE,message=FALSE}
 #gráficos
 # boxplot sexo x peso
 graf1 = ggplot(dados_1, aes(Sexo,Peso,fill=Sexo))
@@ -387,7 +403,7 @@ grid.arrange(graf1, graf2, nrow=1, ncol=2)
 Na figura 2 abaixo, temos um gráfico de dispersão do peso em relação a altura dos indivíduos, desconsiderando o gênero. Podemos perceber que há uma relação positiva entre a váriavel resposta(peso) e a variável explicativa(altura), isto é, quanto maior a altura, maior o peso do indivíduo. Tal relação pode ser razoavelmente representada por uma reta ou uma curva quadrática.
 
 \vspace{0.6cm}
-```{r disp_11, cache=TRUE,echo = FALSE,fig.align='center',fig.width=5.5,fig.height=3.4,warning=FALSE}
+```{r disp_11, cache=TRUE,echo = FALSE,fig.align='center',fig.width=5.5,fig.height=3.4,warning=FALSE,message=FALSE}
 # Dispersão entre Altura e Peso (Desconsiderando o sexo)
 ggplot(dados_1, aes(Altura,Peso))+geom_point()+labs(title = "Dispersão entre as variáveis Altura e Peso" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))+theme_light()
 ```
@@ -400,7 +416,7 @@ Podemos ver que para ambos os sexos,há uma relação positiva, o peso cresce a 
 Tanto para o sexo feminino quanto o masculino podemos ainda razoavelmente representar esta relação entre peso e altura por uma reta ou uma curva quadrática.
 
 \vspace{0.5cm}
-```{r disp_12, cache=TRUE,echo = FALSE,fig.width=5.5,fig.height=3.5,fig.align='center'}
+```{r disp_12, cache=TRUE,echo = FALSE,fig.width=5.5,fig.height=3.5,fig.align='center',warning=FALSE,message=FALSE}
 # Dispersão entre Altura e Peso (feminino)
 graf4= ggplot(Altf, aes(Altura,Peso))
 graf4=graf4+geom_point()+labs(title = "Sexo Feminino" , x = "Altura", y="Peso")+theme(plot.title = element_text(hjust = 0.5))+theme_light()
@@ -423,11 +439,11 @@ grid.arrange(graf4, graf5, nrow=1, ncol=2)
  
 Devido ao objetivo em questão e aos resultados da análise descritiva, vamos considerar quatro modelos e verificar qual deles é o mais reduzido e melhor se ajusta aos dados.
 
-Para os dois primeiros, consideramos modelos com intercepto, o primeiro deles, é um modelo linear centrado na média, enquanto que o segundo é um modelo quadrático também centrado na média. Esses dois modelos nos permite identificar se o intercepto modifica as análises sobre a significância da covariável sexo.
+Para os dois primeiros, consideramos modelos com interceptos (um para cada sexo), o primeiro deles, é um modelo linear centrado na média, enquanto que o segundo é um modelo quadrático também centrado na média. Esses dois modelos nos permitem identificar se os interceptos modificam as análises sobre a significância da covariável sexo.
 
  Para os outros dois, consideramos o modelo sem intecepto, onde o primeiro deles é modelo linear e o segundo, um modelo quadrático. Tal sugestão foi feita, pois além dos objetivos descritos acima, desejamos identificar se esses modelos fornecem informação relevante, mesmo contendo menos paramêtros.
 
-Dado a natureza dos dados, não faz sentido observarmos algum valor diferente de zero para a variavel resposta quando a variavel explicativa for é igual a zero, por isso, os modelos com intercepto sugeridos são todos centrados na média.
+OBS: Dado a natureza dos dados, não faz sentido observarmos algum valor diferente de zero para a variavel resposta quando a variavel explicativa for é igual a zero, por isso, os modelos com intercepto sugeridos são todos centrados na média.
 
 Modelo 1
 
@@ -448,14 +464,15 @@ Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$.
 
 \end{itemize}
 
-```{r,cache = TRUE,echo=FALSE}
+```{r,cache = TRUE,echo=FALSE,warning=FALSE,message=FALSE}
 #análise para o modelo 1
 fit_1 = lm(Peso~-1+Sexo+(Alturamf:Sexo))
 resumo_fit_1 = summary(fit_1)
 coeff_fit_1 = resumo_fit_1$coefficients
-coeff_fit_1 = data.frame(round(as.double(coeff_fit_1[,1]),4),round(as.double(coeff_fit_1[,2]),4),round(as.double(coeff_fit_1[,3]),4),ifelse(as.double(coeff_fit_1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
+IC_fit_1 <- ICt_FIT(fit_1)
+coeff_fit_1 = data.frame(round(as.double(coeff_fit_1[,1]),4),round(as.double(coeff_fit_1[,2]),4),IC_fit_1,round(as.double(coeff_fit_1[,3]),4),ifelse(as.double(coeff_fit_1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_1[,4]),4)))
 
-names(coeff_fit_1)=c("Estimativa","EP","Valor T","Valor p")
+names(coeff_fit_1)=c("Estimativa","EP","LI IC (.95)","LS IC (.95)","Valor T","Valor p")
 
 # Estatísticas para comparação de modelos
 medidas_modelo_1 = data.frame(rbind(AIC(fit_1),BIC(fit_1),logLik(fit_1)))
@@ -493,15 +510,16 @@ Onde: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 
 \end{itemize}
 
-```{r,cache = TRUE,echo=FALSE}
+```{r,cache = TRUE,echo=FALSE,warning=FALSE,message=FALSE}
 Alturamf2=Alturamf^2
 
 fit_2 = lm(Peso~-1+Sexo+(Alturamf:Sexo)+(Alturamf2:Sexo))
 resumo_fit_2 = summary(fit_2)
 coeff_fit_2 = resumo_fit_2$coefficients
-coeff_fit_2 = data.frame(round(as.double(coeff_fit_2[,1]),4),round(as.double(coeff_fit_2[,2]),4),round(as.double(coeff_fit_2[,3]),4),ifelse(as.double(coeff_fit_2[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_2[,4]),4)))
+IC_fit_2 <- ICt_FIT(fit_2)
+coeff_fit_2 = data.frame(round(as.double(coeff_fit_2[,1]),4),round(as.double(coeff_fit_2[,2]),4),IC_fit_2,round(as.double(coeff_fit_2[,3]),4),ifelse(as.double(coeff_fit_2[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_2[,4]),4)))
 
-names(coeff_fit_2)=c("Estimativa","EP","Valor T","Valor p")
+names(coeff_fit_2)=c("Estimativa","EP","LI IC (.95)","LS IC (.95)","Valor T","Valor p")
 
 # Estatísticas para comparação de modelos
 medidas_modelo_2 = data.frame(rbind(AIC(fit_2),BIC(fit_2),logLik(fit_2)))
@@ -536,14 +554,15 @@ Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 
 
 \end{itemize}
-```{r,cache = TRUE,echo=FALSE}
+```{r,cache = TRUE,echo=FALSE,warning=FALSE,message=FALSE}
 #analise para o modelo 3
 fit_3 = lm(Peso~-1+(Altura:Sexo),data=dados_1)
 resumo_fit_3 = summary(fit_3)
 coeff_fit_3 = resumo_fit_3$coefficients
-coeff_fit_3 = data.frame(round(as.double(coeff_fit_3[,1]),4),round(as.double(coeff_fit_3[,2]),4),round(as.double(coeff_fit_3[,3]),4),ifelse(as.double(coeff_fit_3[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_3[,4]),4)))
+IC_fit_3 <- ICt_FIT(fit_3)
+coeff_fit_3 = data.frame(round(as.double(coeff_fit_3[,1]),4),round(as.double(coeff_fit_3[,2]),4),IC_fit_3,round(as.double(coeff_fit_3[,3]),4),ifelse(as.double(coeff_fit_3[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_3[,4]),4)))
 
-names(coeff_fit_3)=c("Estimativa","EP","Valor T","Valor p")
+names(coeff_fit_3)=c("Estimativa","EP","LI IC (.95)","LS IC (.95)","Valor T","Valor p")
 
 # Estatísticas para comparação de modelos
 medidas_modelo_3 = data.frame(rbind(AIC(fit_3),BIC(fit_3),logLik(fit_3)))
@@ -581,15 +600,16 @@ Com: $\varepsilon_{ij}\sim \mathit{N}(0,\sigma ^{2})$
 \end{itemize}
 
 
-```{r,cache = TRUE,echo=FALSE}
+```{r,cache = TRUE,echo=FALSE,warning=FALSE,message=FALSE}
 #analises para o modelo 4
 alt2 = dados_1$Altura^2
 fit_4 = lm(Peso~-1+(Altura:Sexo)+(alt2:Sexo),data=dados_1)
 resumo_fit_4 = summary(fit_4)
 coeff_fit_4 = resumo_fit_4$coefficients
-coeff_fit_4 = data.frame(round(as.double(coeff_fit_4[,1]),4),round(as.double(coeff_fit_4[,2]),4),round(as.double(coeff_fit_4[,3]),4),ifelse(as.double(coeff_fit_4[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_4[,4]),4)))
+IC_fit_4 <- ICt_FIT(fit_4)
+coeff_fit_4 = data.frame(round(as.double(coeff_fit_4[,1]),4),round(as.double(coeff_fit_4[,2]),4),IC_fit_4,round(as.double(coeff_fit_4[,3]),4),ifelse(as.double(coeff_fit_4[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_4[,4]),4)))
 
-names(coeff_fit_4)=c("Estimativa","EP","Valor T","Valor p")
+names(coeff_fit_4)=c("Estimativa","EP","LI IC (.95)","LS IC (.95)","Valor T","Valor p")
 
 # Estatísticas para comparação de modelos
 medidas_modelo_4 = data.frame(rbind(AIC(fit_4),BIC(fit_4),logLik(fit_4)))
@@ -608,11 +628,11 @@ ordinários, mais detalhes na referência 1(Azevedo (2016)) e análises residuai
 Podemos ver que o modelo 4 sugerido, apresentou um melhor ajuste, em comparação com os outros três, embora tanto este quanto os outros ajustes não sejam satisfatórios. 
 
 Para o modelo 1, na figura 4, podemos notar pelo gráfico A que uma observação se destaca das demais. Já pelo gráfico B(resíduos x valores ajustados), nota-se indícios de heterocedasticidade uma vez que, a variabilidade dos resíduos parece aumentar com o aumento do valores ajustados. 
-Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que possívelmente pode indicar a não normalidade dos dados.Além disso, o gráfico de envelopes, na figura 5, acusa um mal ajuste, devido ao comportamente levemente sistemático. Dadas as observações feitas,concluimos que o modelo não teve um ajuste adequado.
+Tanto pelo gráfico C, quanto pelo gráfico D, nota-se uma leve assimetria positiva nos dados. Além disso, no gráfico D, temos a presença de outliers, o que possívelmente pode indicar a não normalidade dos dados.Além disso, o gráfico de envelopes, na figura 5, acusa um mal ajuste, devido ao comportamento levemente sistemático. Dadas as observações feitas,concluimos que o modelo não teve um ajuste adequado.
 
 Para o modelo 2, os aspectos mencionados acima para o modelo 1 continuam presentes, com exceção do boxplot que acusou um numero maior de outliers. Como podemos ver na figura 6.
 
-Para o modelo 3, observamos na figura 8 que há uma tendência de aumento na variabilidade dos dados com o aumento dos valores ajustados no gráfico B, além disso, podemos observar dois grupos distintos, mas isto é devido a natureza dos dados, uma vez que eles estão separados por sexo. Tal tendência, indica um possível heterocedasticidade. Nota-se pelos gráficos C e D, uma leve assimetria positiva, com presença de outliers no gráfico D.
+Para o modelo 3, observamos na figura 8 que há uma tendência de aumento na variabilidade dos dados com o aumento dos valores ajustados no gráfico B, além disso, podemos observar dois grupos distintos, mas isto é devido à natureza dos dados, uma vez que eles estão separados por sexo. Tal tendência, indica um possível heterocedasticidade. Nota-se pelos gráficos C e D, uma leve assimetria positiva, com presença de outliers no gráfico D.
 O gráfico de envelopes, na figura 9, apresenta uma tendência e novamente,vários pontos fora dos envelopes, sugerindo assim, uma falta de normalidade.
 
 Para o modelo 4, pela figura 10 podemos ver um ponto discrepante tanto no gráfico A como no gráfico B. No gráfico A, não se observa nenhuma tendência que indique dependência dos dados. No gráfico B, notamos um pequeno agrupamento dos dados e logo depois uma pequena dispersão dos mesmos, tal tendência, sugere uma possível heterocedasticidade dos dados.Ambos os gráficos C e D, mostram uma leva assimetria positiva, onde no gráfico C e no gráfico D, temos a presença de outliers, tanto abaixo como acima da média.
@@ -620,22 +640,23 @@ O gráfico de envelopes para o modelo 4, na figura 11, apresenta uma tendência 
 
 Concluímos, então, que nenhum dos quatro modelos se ajustou bem. Contudo, devido ao fato de não podermos escolher modelos para além da classe dos modelos lineares normais homocedásticos, iremos continuar comparando os modelos propostos acima.
 
-As estatísticas de comparação dos quatro modelos podem serem vistas na tabela 2. Seguindo o critério de escolha usando as estatísticas AIC e BIC, temos novamente que o modelo 4 é o modelo mais bem ajustado. Na tabela 2 também podemos ver os valores para $R^2$ e $R^2$ ajustado para cada modelo, para todos os modelos os valores são relativamente altos, indicando que os respectivos modelos explicam quase que 100% da variabilidade do dados.Sabemos porém que, a simples visualização dessas quantidades, por si só, não é
+As estatísticas de comparação dos quatro modelos podem serem vistas na tabela 2. Seguindo o critério de escolha usando as estatísticas AIC e BIC, temos novamente que o modelo 1 é o modelo mais bem ajustado. Na tabela 2 também podemos ver os valores para $R^2$ e $R^2$ ajustado para cada modelo, para todos os modelos os valores são relativamente altos, indicando que os respectivos modelos têm alto poder explicativo quanto à variabilidade do dados.Sabemos porém que, a simples visualização dessas quantidades, por si só, não é
 suficiente para se medir a adequabilidade do modelo.
 
-Na Tabela 3 apresentamos os principais resultados relativos à estimação pontual e intervalar dos quatros modelos. Podemos ver que para os modelos 1 e 3, todos os parâmetros sao significativos para qualquer nível de significância usual(0,01 à 0,10).Já para o modelo 2, os parâmetros $\beta_{01}$, $\beta_{02}$ e $\beta_{12}$ são significativos para os mesmos níveis de significancia citados acima, enquanto que o parâmetro $\beta_{11}$ é significativo apenas à níveis até 0,05 e os parâmetros $\beta_{21}$ e $\beta_{22}$ não são relevantes.
-E para o modelo 4, apenas o parâmetro $\beta_{22}$ é significante à qualquer nível de significancia usual, enquanto que $\beta_{21}$ é significante para níveis até 0,05, já os demais parâmetros não são significativos.
+Na Tabela 3 apresentamos os principais resultados relativos à estimação pontual e intervalar dos quatros modelos. Podemos ver que para os modelos 1 e 3, todos os parâmetros sao significativos para qualquer nível de significância usual(0,01 à 0,10).Já para o modelo 2, os parâmetros $\beta_{01}$, $\beta_{02}$,$\beta_{11}$ e $\beta_{12}$ são significativos para os mesmos níveis de significancia citados acima, enquanto que os parâmetros $\beta_{21}$ e $\beta_{22}$ não são significativos (à níveis de significância usuais).
+Para o modelo 4, apenas o parâmetro $\beta_{22}$ é significante à qualquer nível de significancia usual, enquanto que $\beta_{21}$ é significante para níveis a partir de 0,05, já os demais parâmetros não são significativos (à níveis de significância usuais).
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #Análise de resíduos para o modelo 1
 library(ggplot2)
+library(gridExtra)
 diag2norm(fit_1)
 ```
 \begin{center}
 `r legenda_graf4`
 \end{center}
 
-```{r,echo =FALSE,fig.width=6.5,fig.height=4,fig.align='center',eval=FALSE}
+```{r,echo =FALSE,fig.width=6.5,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 1
 envelnorm(fit_1)
 ```
@@ -645,7 +666,7 @@ envelnorm(fit_1)
 \end{center}
 
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 ##Análise de resíduos para o modelo 2
 diag2norm(fit_2)
 ```
@@ -654,7 +675,7 @@ diag2norm(fit_2)
 `r legenda_graf6`
 \end{center}
 
-```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',eval=FALSE}
+```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 2
 envelnorm(fit_2)
 ```
@@ -663,7 +684,7 @@ envelnorm(fit_2)
 `r legenda_graf7`
 \end{center}
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #Análise de resíduos para o modelo 3
 diag2norm(fit_3)
 ```
@@ -672,7 +693,7 @@ diag2norm(fit_3)
 `r legenda_graf8`
 \end{center}
 
-```{r,echo = TRUE,fig.width=7,fig.height=4,fig.align='center',eval=FALSE}
+```{r,echo = FALSE,fig.width=7,fig.height=4,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 3
 envelnorm(fit_3)
 ```
@@ -681,7 +702,7 @@ envelnorm(fit_3)
 `r legenda_graf9`
 \end{center}
 
-```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=FALSE}
+```{r,echo =FALSE,fig.width=8,fig.height=6,fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 ##Análise de resíduos para o modelo 4
 diag2norm(fit_4)
 ```
@@ -690,7 +711,7 @@ diag2norm(fit_4)
 `r legenda_graf10`
 \end{center}
 
-```{r,echo = TRUE,fig.width=7,fig.height=4, fig.align='center',eval=FALSE}
+```{r,echo = FALSE,fig.width=7,fig.height=4, fig.align='center',eval=TRUE,warning=FALSE,message=FALSE}
 #gráfico de envelopes do modelo 4
 envelnorm(fit_4)
 ```
@@ -699,7 +720,7 @@ envelnorm(fit_4)
 `r legenda_graf11`
 \end{center}
 
-```{r, echo=FALSE,results="hide"}
+```{r, echo=FALSE,results="hide",warning=FALSE,message=FALSE}
 tabela_medidas_modelos=cbind(medidas_modelo_1,medidas_modelo_2,medidas_modelo_3,medidas_modelo_4)
 
 rmodel1=round(summary(fit_1)$r.squared,4)
@@ -721,7 +742,7 @@ rqmodel4=round(summary(fit_4)$adj.r.squared,4)
 `r legenda_table2`
 \end{center}
 
-```{r, echo=FALSE}
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
 options(OutDec= ",")
 AIC1=round(AIC(fit_1),4)
 AIC2=round(AIC(fit_2),4)
@@ -753,7 +774,7 @@ $R^2$ Ajustado & `r rqmodel1` & `r rqmodel2` & `r rqmodel3` & `r rqmodel4` \\
 \end{tabular}
 \end{table}
 
-```{r, echo=F}
+```{r, echo=F,warning=FALSE,message=FALSE}
 #tabela das estimativas
 tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
 #fazer intervalo de confiança
@@ -800,7 +821,7 @@ Modelo & Parâmetro & Estimativa & EP & Valor T & Valor p \\
 \end{tabular}
 \end{table}
 
-```{r ajust_model1, echo=F,eval=FALSE}
+```{r ajust_model1, echo=F,eval=FALSE,warning=FALSE,message=FALSE}
 library(ggplot2)
 gf1=ggplot(data=subset(dadosalt,Sexo=="F"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[1,1],coeff_fit_1[3,1],linetype=1)+theme_light()
 
@@ -836,8 +857,8 @@ grid.arrange(gf1,gm1,gf2,gm2,gf3,gm3,gf4,gm4,ncol=2,nrow=4)
 \end{enumerate}
 \vspace{0.3cm}
 
-Nenhum  dos quatro modelos propostos teve bom ajuste aos conjunto de dados portanto optou-se por aquele cujo ajustamento fora o menos pior dentre eles. Os modelos apontaram uma tendência crescentes nos dados, vistas na análise descritiva para ambos os sexos. Conclui-se então que o melhor modelo, segundo os critérios de seleção e comparação de modelos AIC, BIC e Log-Verossimilhança, é o modelo 4 pois teve o menor valor entre os valores entre os AIC's e BIC's e o segundo maior das Log-Verossimilhanças comparadas, mesmo que houvesse pouca diferença em relação ao modelo quatro mas como o  escolhido possui menos parâmetros e portanto, é o mais reduzido.
-Vê-se que o aumento em uma unidade de altura acarreta em um aumento no peso do indivíduo.
+Nenhum  dos quatro modelos propostos teve bom ajuste ao conjunto de dados. Porém, dado o escopo do curso (classe de modelos lineares normais homocedásticos), continuou-se com as análises optando-se por selecionar o modelo que melhor se adequa aos dados. Conclui-se então que o melhor modelo, segundo os critérios de seleção e comparação de modelos AIC, BIC e Log-Verossimilhança, é o modelo 1 pois teve os menores valores entre os valores observados de AIC's e BIC's dos modelos, e o segundo maior das Log-Verossimilhanças comparadas dos modelos. Nota-se também, pela tabela 3, que todos os coeficiêntes do modelo 1 são diferentes de zero, para qualquer nível de significância usual (0,01 à 0,10). 
+Os modelos apontaram uma tendência crescentes nos dados, vistas na análise descritiva para ambos os sexos. Vê-se que o aumento em uma unidade de altura acarreta em um aumento no peso do indivíduo e este aumento, segundo os resultados obtidos, não muda sua magnitude conforme os valores de alturas observadas.
 
 \vspace{0.5cm}
 
