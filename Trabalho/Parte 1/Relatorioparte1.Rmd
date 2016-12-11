@@ -822,28 +822,28 @@ tabelaestimativas=rbind(coeff_fit_1,coeff_fit_2,coeff_fit_3,coeff_fit_4)
 \hline
 \end{tabular}
 \end{table}
-
-```{r ajust_model1, echo=F, eval=FALSE,warning=FALSE,message=FALSE}
+\vspace{0.5cm}
+```{r ajust_model1, eval=FALSE, echo=F,warning=FALSE,message=FALSE}
 library(ggplot2)
 gf1=ggplot(data=subset(dadosalt,Sexo=="F"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[1,1],coeff_fit_1[3,1],linetype=1)+theme_light()
 
 gm1=ggplot(data=subset(dadosalt,Sexo=="M"),aes(x=Alturamf,y=Peso))+geom_point()+geom_abline(intercept=coeff_fit_1[2,1],coeff_fit_1[4,1],linetype=1)+theme_light()
-grid.arrange(gf1,gm1,ncol=2,nrow=1)
+#grid.arrange(gf1,gm1,ncol=2,nrow=1)
 
 gf2= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_2[1,1],linetype=1)+theme_light()
 
 gm2= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_2[2,1],linetype=1)+theme_light()
-grid.arrange(gf2,gm2,ncol=2,nrow=1)
+#grid.arrange(gf2,gm2,ncol=2,nrow=1)
 
 gf3= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[1,1],linetype=1)+theme_light()
 
 gm3= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_3[2,1],linetype=1)+theme_light()
-grid.arrange(gf3,gm3,ncol=2,nrow=1)
+#grid.arrange(gf3,gm3,ncol=2,nrow=1)
 
 gf4= ggplot(data=Altf,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_4[1,1],linetype=1)+theme_light()
 
 gm4= ggplot(data=Altm,aes(x=Altura,y=Peso))+geom_point()+geom_abline(intercept = 0,slope=coeff_fit_4[2,1],linetype=1)+theme_light()
-grid.arrange(gf4,gm4,ncol=2,nrow=1)
+#grid.arrange(gf4,gm4,ncol=2,nrow=1)
 
 
 grid.arrange(gf1,gm1,gf2,gm2,gf3,gm3,gf4,gm4,ncol=2,nrow=4)
