@@ -447,7 +447,7 @@ OBS: Dado a natureza dos dados, não faz sentido observarmos algum valor diferen
 
 Modelo 1
 
-$$Y_{ij} = \beta_{0i}+\beta_{1i} (x_{ij}-\bar{x_{i}})+\varepsilon_{ij} \left\{\begin{matrix}
+$$Y_{ij} = \beta_{0i}+\beta_{1i} (x_{ij}-\bar{x})+\varepsilon_{ij} \left\{\begin{matrix}
 i=1,2\\ 
 j=1,\dots, 199\\ 
 \end{matrix}\right.$$
@@ -491,7 +491,7 @@ rownames(medidas_modelo_1)=c("AIC","BIC","Log-Verossimilhança")
 \vspace{1cm}
 Modelo 2
 
-$$Y_{ij} = \beta_0{i}+\beta_1{i} (x_{ij}-\bar{x})+\beta_2{i} (x_{ij}-\bar{x})^
+$$Y_{ij} = \beta_{0i}+\beta_{1i} (x_{ij}-\bar{x})+\beta_{2i} (x_{ij}-\bar{x})^
 {2}+\varepsilon_{ij}\left\{\begin{matrix}
 i=1,2\\ 
 j=1,\dots, 199\\ 
@@ -861,9 +861,9 @@ grid.arrange(gf1,gm1,gf2,gm2,gf3,gm3,gf4,gm4,ncol=2,nrow=4)
 Nenhum  dos quatro modelos propostos teve bom ajuste ao conjunto de dados. Porém, dado o escopo do curso (classe de modelos lineares normais homocedásticos), continuou-se com as análises optando-se por selecionar o modelo que melhor se adequa aos dados. Conclui-se então que o melhor modelo, segundo os critérios de seleção e comparação de modelos AIC, BIC e Log-Verossimilhança, é o modelo 1 pois teve os menores valores entre os valores observados de AIC's e BIC's dos modelos, e o segundo maior das Log-Verossimilhanças comparadas dos modelos. Nota-se também, pela tabela 3, que todos os coeficiêntes do modelo 1 são diferentes de zero, para qualquer nível de significância usual (0,01 à 0,10). 
 Os modelos apontaram uma tendência crescentes nos dados, vistas na análise descritiva para ambos os sexos. Vê-se que o aumento em uma unidade de altura acarreta em um aumento no peso do indivíduo e este aumento, segundo os resultados obtidos, não muda sua magnitude conforme os valores de alturas observadas.
 
-\vspace{0.5cm}
+\vspace{1cm}
 
-\newpage
+
 \begin{enumerate}
 \setcounter{enumi}{4}
 \item Referências Bibliográficas
